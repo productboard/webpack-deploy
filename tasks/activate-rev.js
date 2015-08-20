@@ -1,4 +1,5 @@
 var gulp = require('gulp');
+var util = require('util');
 var gutil = require('gulp-util');
 
 var argv = require('yargs').argv;
@@ -11,15 +12,15 @@ var getRedisClient = require('./utils').getRedisClient;
 
 function activateVersion(rev, config) {
   getRedisClient(config, function(client) {
-    client.get('app:' + rev, function (err, file) {
+    client.get(util.format(config.indexKey, rev), function (err, file) {
       if (!file) {
         gutil.log(gutil.colors.red("Revision " + rev + " not found"));
       } else if (err) {
         gutil.log(gutil.colors.red("Error:"), err);
       } else {
         gutil.log(gutil.colors.yellow(env()), 'Activating rev', gutil.colors.green(rev));
-        client.set('app:current', file);
-        client.set('app:current-revision', rev);
+        client.set(config.mainIndexKey, file);
+        client.set(config.mainRevKey, rev);
       }
       client.end();
     });

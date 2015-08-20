@@ -16,24 +16,44 @@ var config = {
       host: 'localhost',
       db: 1,
       options: { },
+      indexPath: 'dist/index.html',
+      indexKey: 'app:%s',
+      metaKey: 'meta:%s',
+      mainIndexKey: 'app:current',
+      mainRevKey: 'app:current-revision',
     },
     staging: {
       port:    9999,
       db:      0,
       host:    'pub-redis-9999.us-east-1-1.2.ec2.garantiadata.com',
-      options: { auth_pass: secrets.redis.staging.auth_pass }
+      options: { auth_pass: secrets.redis.staging.auth_pass },
+      indexPath: 'dist/index.html',
+      indexKey: 'app:%s',
+      metaKey: 'meta:%s',
+      mainIndexKey: 'app:current',
+      mainRevKey: 'app:current-revision',
     },
     me: {
       port:    8888,
       db:      0,
       host:    'pub-redis-8888.us-east-1-3.3.ec2.garantiadata.com',
-      options: { auth_pass: secrets.redis.me.auth_pass }
+      options: { auth_pass: secrets.redis.me.auth_pass },
+      indexPath: 'dist/index.html',
+      indexKey: 'app:%s',
+      metaKey: 'meta:%s',
+      mainIndexKey: 'app:current',
+      mainRevKey: 'app:current-revision',
     },
     production: {
       port:    7777,
       db:      0,
       host:    'pub-redis-7777.us-east-1-1.2.ec2.garantiadata.com',
-      options: { auth_pass: secrets.redis.production.auth_pass }
+      options: { auth_pass: secrets.redis.production.auth_pass },
+      indexPath: 'dist/index.html',
+      indexKey: 'app:%s',
+      metaKey: 'meta:%s',
+      mainIndexKey: 'app:current',
+      mainRevKey: 'app:current-revision',
     }
   },
 

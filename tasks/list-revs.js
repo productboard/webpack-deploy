@@ -1,5 +1,6 @@
 /*eslint no-console: 0 */
 var gulp = require('gulp');
+var util = require('util');
 var path = require('path');
 var gutil = require('gulp-util');
 var redis = require('redis');
@@ -16,11 +17,11 @@ var getRedisClient = require('./utils').getRedisClient;
 
 function printAllRevs(config) {
   getRedisClient(config, function(client) {
-    client.get('app:current-revision', function(err, currentRev) {
+    client.get(config.mainRevKey, function(err, currentRev) {
       if (err) { gutil.log(gutil.colors.red("Error:"), err); }
       // gutil.log(gutil.colors.yellow(env()), 'Current revision', data);
 
-      client.keys('app:???????', function(err2, data) {
+      client.keys(util.format(config.indexKey, '???????'), function(err2, data) {
         if (err2) { gutil.log(gutil.colors.red("Error:"), err2); }
         gutil.log(gutil.colors.yellow(env()), 'List of deployed revisions:');
 
@@ -47,7 +48,7 @@ function printAllRevs(config) {
 
             commitData = commitData[0];
 
-            client.get('meta:' + revHash, function(err4, metadata) {
+            client.get(util.format(config.metaKey, revHash), function(err4, metadata) {
               if (err4) {
                 gutil.log(gutil.colors.red("Error:"), err4);
                 return callback(err4);
