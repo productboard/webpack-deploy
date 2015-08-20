@@ -27,12 +27,15 @@ case "$ENV" in
   staging)
     DOMAIN="https://pb.productboard.info"
     ;;
+  me)
+    DOMAIN="https://pb.productboard.me"
+    ;;
   development)
     DOMAIN="http://pb.pbe.dev"
     ;;
   *)
   echo "Usage: deploy [enviroment]"
-  echo "Available environments: production, staging, development"
+  echo "Available environments: production, staging, me, development"
   exit 1
 esac
 
