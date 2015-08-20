@@ -1,0 +1,48 @@
+#!/usr/bin/env node
+const path = require('path');
+const argv = require('yargs').argv;
+const exec = require('child_process').fork;
+const gutil = require('gulp-util');
+
+console.time('Time');
+
+const ENV = argv._.length > 0 ? argv._[0] : 'staging';
+const DOMAIN = ENV === 'production' ? 'pb.productboard.com' : 'pb.productboard.info';
+
+// const COMMIT = exec('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
+// const BRANCH = exec('git rev-parse --abbrev-ref HEAD', { encoding: 'utf8' }).trim();
+
+// if (BRANCH === 'dev' || BRANCH === 'master') {
+//   var REV = COMMIT;
+//   console.log("Deploying with commit hash", REV);
+// } else {
+//   var REV = "branch/" + BRANCH;
+//   console.log("Deploying branch", BRANCH)
+// }
+
+// const out = exec('gulp --gulpfile ' + path.join(__dirname, '..', 'gulpfile.js') + ' deploy-s3', { encoding: 'utf8' });
+const out = exec(path.join(__dirname, '..', 'node_modules/.bin/gulp'), ['--gulpfile', path.join(__dirname, '..', 'gulpfile.js')]);//, { encoding: 'utf8' }
+// process.stdout.write(out);
+
+// console.log(out);
+out.on('exit', function(code, signal) {
+  // console.log('code', code);
+
+  require('../gulpfile.js');
+  // require('gulp').start('deploy-s3');
+  // require('gulp').start('rollbar-source-map');
+  // require('gulp').start('deploy-redis');
+  if (ENV !== 'development') {
+  // require('gulp').start('slack-notify');
+  }
+
+  console.log("\nDeploy into " + gutil.colors.yellow(ENV) + " environment done.");
+  console.timeEnd('Time');
+
+  console.log("\nTEST with:");
+  console.log("\thttps://" + DOMAIN + "/?rev=" + REV);
+  console.log("THEN to activate run:");
+  console.log("\tactivate-rev --env=" + ENV + " --rev=" + REV + "\n");
+});
+
+

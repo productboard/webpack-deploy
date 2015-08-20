@@ -1,10 +1,26 @@
+var path = require('path');
+var fs = require('fs');
 var gutil = require('gulp-util');
 
 var redis = require('redis');
 var revision = require('git-rev');
 var argv = require('yargs').argv;
 
-var deployConfig = require('./deploy-config.js');
+var CONFIG_FILENAME = 'deploy-config.js';
+
+function requireConfig(filename) {
+  gutil.log('Using config file ' + gutil.colors.magenta(filename));
+  return require(filename);
+}
+
+if (fs.existsSync(path.join(process.cwd(), CONFIG_FILENAME))) {
+  var deployConfig = requireConfig(path.join(process.cwd(), CONFIG_FILENAME));
+} else if (fs.existsSync(path.join(__dirname, '..', CONFIG_FILENAME))) {
+  var deployConfig = requireConfig(path.join(__dirname, '..', CONFIG_FILENAME));
+} else {
+  gutil.log(gutil.colors.red('No "' + CONFIG_FILENAME + '" provided'));
+  process.exit(1);
+}
 
 
 var env = function() {

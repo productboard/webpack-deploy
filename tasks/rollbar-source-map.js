@@ -9,15 +9,16 @@ var getConfigFor = require('./utils').getConfigFor;
 
 
 gulp.task('rollbar-source-map', function(callback) {
+  var config = getConfigFor('rollbar');
   // curl https://api.rollbar.com/api/1/sourcemap/download \
   // -F access_token=aaaabbbbccccddddeeeeffff00001111 \
   // -F version=92429d82a41e930486c6de5ebda9602d55c39986 \
   // -F minified_url=http://example.com/static/js/example.min.js
   getRevision(function (rev) {
     request.post({url: 'https://api.rollbar.com/api/1/sourcemap/download', form: {
-      'access_token': getConfigFor('rollbar').accessToken,
+      'access_token': config.accessToken,
       'version': rev,
-      'minified_url': 'http://XXX.cloudfront.net/assets/main-' + hash() + '.js',
+      'minified_url': config.publicPath + 'main-' + hash() + '.js',
     }}, callback)
     .on('response', function(data) {
         data.on('data', function(all) {

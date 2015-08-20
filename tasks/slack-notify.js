@@ -1,10 +1,10 @@
 var gulp = require('gulp');
+var gutil = require('gulp-util');
 var request = require('superagent');
 var argv = require('yargs').argv;
 
 var getRevision = require('./utils').getRevision;
-
-var webhookUrl = 'https://hooks.slack.com/services/XXXX/XXXX/XXXXXYYYYYYZZZZZZ';
+var getConfigFor = require('./utils').getConfigFor;
 
 
 function messagePayload(env, rev) {
@@ -28,18 +28,20 @@ function messagePayload(env, rev) {
   };
 }
 
-function notifyRevDeployed() {
+function notifyRevDeployed(config) {
   if (argv.env) {
     getRevision(function (rev) {
       var payload = messagePayload(argv.env, rev);
-      return request.post(webhookUrl).send(payload).end();
+      return request.post(config.notifyWebHook).send(payload).end();
     });
+  } else {
+    gutil.log(gutil.colors.red('No environment provided to Slack Notify'));
   }
 }
 
 /**
  * Prints current revision number used as a redis key
  */
-gulp.task('slack-notify', [], notifyRevDeployed);
-
-
+gulp.task('slack-notify', [], function() {
+  return notifyRevDeployed(getConfigFor('slack'));
+});

@@ -27,8 +27,9 @@ function printAllRevs(config) {
         var getRev = function(rev, callback) {
           var revHash = rev.substr(4);
           if (revHash === 'current') return callback();
+
           gitlog({
-            repo: path.resolve(__dirname, '../.git'),
+            repo: path.resolve(process.cwd(), '.git'),
             number: 1,
             fields: [ 'abbrevHash', 'subject', 'committerDate', 'committerDateRel', 'authorName', 'hash' ],
             branch: revHash,
@@ -99,7 +100,7 @@ function printAllRevs(config) {
 /**
  * Prints list of deployed revision numbers
  */
-gulp.task('list-rev', [], function() {
+gulp.task('list-revs', [], function() {
   printAllRevs(getConfigFor('redis'));
 });
 
