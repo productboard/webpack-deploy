@@ -2,12 +2,16 @@
 Collection of useful utilities for deploying (not only) Webpack apps
 
 ## Installation
-`npm install`
+```
+cd $YOUR_PROJECT
+npm install --save-dev productboard/webpack-deploy
+````
 
 ## Configuration
-Copy sample config files and fit them to your needs.
+Copy `deploy-config-example.js` and `secrets-example.js` into the root of your
+project and fit them to your needs.
 
 ## Other
 
 ### Why Bash with Gulp?
-Gulp is good for one thing, Bash for the rest.
+Gulp is great for building, Bash for running tasks.

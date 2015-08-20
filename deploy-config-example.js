@@ -61,7 +61,12 @@ var config = {
     development: secrets.rollbar.development,
     staging: secrets.rollbar.staging,
     production: secrets.rollbar.production,
-  }
+  },
+
+  slack: {
+    notifyWebHook: 'https://hooks.slack.com/services/XXXXYYYY/ZZZZUUUUU/asdjLJFHLFJKHLDJKFHDdfdh',
+  },
+
 };
 
 module.exports = config;
