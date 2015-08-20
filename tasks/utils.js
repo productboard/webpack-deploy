@@ -39,7 +39,7 @@ module.exports.getRevision = function(cb) {
 };
 
 module.exports.getConfigFor = function(prop) {
-  return deployConfig[prop] && deployConfig[prop][env()];
+  return deployConfig[prop] && deployConfig[prop][env()] || deployConfig[prop];
 };
 
 module.exports.getRedisClient = function(config, callback) {
