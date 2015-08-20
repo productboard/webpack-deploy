@@ -61,19 +61,23 @@ var config = {
     // Let's stick with single S3 bucket for now
     development: {
       credentials: s3Credential,
-      dirname: '/development/assets'
+      dirname: '/development/assets',
+      assetsPath: 'dist/assets/*',
     },
     staging: {
       credentials: s3Credential,
-      dirname: '/development/assets'
+      dirname: '/development/assets',
+      assetsPath: 'dist/assets/*',
     },
     me: {
       credentials: s3Credential,
-      dirname: '/development/assets'
+      dirname: '/development/assets',
+      assetsPath: 'dist/assets/*',
     },
     production: {
       credentials: s3Credential,
-      dirname: '/development/assets'
+      dirname: '/development/assets',
+      assetsPath: 'dist/assets/*',
     }
   },
 

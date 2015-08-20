@@ -28,7 +28,7 @@ var deployS3 = function(config) {
   // define custom headers
   var headers = { 'Cache-Control': 'max-age=315360000, no-transform, public' };
 
-  return gulp.src('./dist/assets/*')
+  return gulp.src(config.assetsPath)
     .pipe(rename(function (path) {
       path.dirname += config.dirname;
     }))
