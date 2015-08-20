@@ -8,10 +8,9 @@ var getRevision = require('./utils').getRevision;
 var getConfigFor = require('./utils').getConfigFor;
 
 
-function messagePayload(env, rev) {
+function messagePayload(config, env, rev) {
   var title = "New frontend revision " + rev + " was deployed on " + env + " from " + os.hostname() + "." ;
-  var tld = (env === 'production' ? 'com' : 'info');
-  var link = "https://pb.productboard." + tld + "/?rev=" + rev
+  var link = config.url + "/?rev=" + rev;
   var text = "You can test it by going to <" + link + ">.";
 
   return {
@@ -32,7 +31,7 @@ function messagePayload(env, rev) {
 function notifyRevDeployed(config) {
   if (argv.env) {
     getRevision(function (rev) {
-      var payload = messagePayload(argv.env, rev);
+      var payload = messagePayload(config, argv.env, rev);
       return request.post(config.notifyWebHook).send(payload).end();
     });
   } else {

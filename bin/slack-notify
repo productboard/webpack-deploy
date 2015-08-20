@@ -1,0 +1,4 @@
+#!/usr/bin/env node
+var path = require('path');
+require(path.join(__dirname, '..', 'tasks', 'slack-notify'));
+require('gulp').start('slack-notify');

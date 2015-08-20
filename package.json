@@ -24,9 +24,9 @@
   "homepage": "https://github.com/productboard/webpack-deploy#readme",
   "bin": {
     "deploy": "bin/deploy.sh",
-    "deploy-node": "bin/deploy",
     "activate-rev": "bin/activate-rev",
-    "list-revs": "bin/list-revs"
+    "list-revs": "bin/list-revs",
+    "slack-notify": "bin/slack-notify"
   },
   "scripts": {
     "build": "./node_modules/.bin/gulp clean && ./node_modules/.bin/gulp webpack",

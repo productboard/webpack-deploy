@@ -64,7 +64,14 @@ var config = {
   },
 
   slack: {
-    notifyWebHook: 'https://hooks.slack.com/services/XXXXYYYY/ZZZZUUUUU/asdjLJFHLFJKHLDJKFHDdfdh',
+    staging: {
+      url: 'https://staging.example.com',
+      notifyWebHook: 'https://hooks.slack.com/services/XXXXYYYY/ZZZZUUUUU/asdjLJFHLFJKHLDJKFHDdfdh',
+    },
+    production: {
+      url: 'https://www.example.com',
+      notifyWebHook: 'https://hooks.slack.com/services/ZZZZYYYY/ZZZZTTTTT/asdjLJFHLFJKHLDJKFHDdfdh',
+    },
   },
 
 };
