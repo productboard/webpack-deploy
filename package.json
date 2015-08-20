@@ -1,0 +1,33 @@
+{
+  "name": "webpack-deploy",
+  "version": "0.1.0",
+  "description": "Collection of useful utilities for deploying (not only) Webpack apps",
+  "main": "index.js",
+  "scripts": {
+    "build": "./node_modules/.bin/gulp clean && ./node_modules/.bin/gulp webpack",
+    "s3": "./node_modules/.bin/gulp deploy-s3 && ./node_modules/.bin/gulp rollbar-source-map --hash=`ls dist/assets/main-*.js 2>/dev/null | cut -f3 -d'/' | cut -f2 -d'-' | cut -f1 -d'.'`",
+    "redis": "./node_modules/.bin/gulp deploy-redis && ./node_modules/.bin/gulp activate-rev",
+    "deploy": "npm run s3 & npm run redis & wait"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/productboard/webpack-deploy.git"
+  },
+  "keywords": [
+    "webpack",
+    "deploy",
+    "build",
+    "s3",
+    "redis",
+    "slack"
+  ],
+  "author": "Tomas Ruzicka",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/productboard/webpack-deploy/issues"
+  },
+  "homepage": "https://github.com/productboard/webpack-deploy#readme",
+  "dependencies": {
+    "gulp": "^3.9.0"
+  }
+}
