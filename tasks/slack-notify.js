@@ -1,4 +1,5 @@
 var gulp = require('gulp');
+var os = require('os');
 var gutil = require('gulp-util');
 var request = require('superagent');
 var argv = require('yargs').argv;
@@ -8,7 +9,7 @@ var getConfigFor = require('./utils').getConfigFor;
 
 
 function messagePayload(env, rev) {
-  var title = "New frontend revision " + rev + " was deployed on " + env + "." ;
+  var title = "New frontend revision " + rev + " was deployed on " + env + " from " + os.hostname() + "." ;
   var tld = (env === 'production' ? 'com' : 'info');
   var link = "https://pb.productboard." + tld + "/?rev=" + rev
   var text = "You can test it by going to <" + link + ">.";
