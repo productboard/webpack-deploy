@@ -52,8 +52,8 @@ gulp_config() {
   gulp --gulpfile "$DIRNAME/../gulpfile.js" --cwd=$PWD $@
 }
 
+# TODO: detect/get build hash
 # npm run build
-
 # HASH=`ls dist/assets/main-*.js 2>/dev/null | cut -f3 -d'/' | cut -f2 -d'-' | cut -f1 -d'.'`
 
 gulp_config deploy-s3 --env=$ENV

@@ -3,7 +3,9 @@ var secrets = require('./secrets.js');
 var s3Credential = {
   accessKeyId:     secrets.s3.accessKeyId,
   secretAccessKey: secrets.s3.secretAccessKey,
-  bucket:          'bucket-assets'
+  params: {
+    Bucket:        'productboard-assets'
+  }
 };
 
 var config = {
