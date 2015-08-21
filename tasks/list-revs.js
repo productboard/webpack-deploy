@@ -37,6 +37,13 @@ function printAllRevs(config) {
           }, function(err3, commitData) {
             var str = revHash === currentRev ? revHash + ' (current)' : revHash;
             if (err3) {
+              if (err3.indexOf('unknown revision') > 0) {
+                return callback(null, [
+                  0,
+                  gutil.colors.yellow(str),
+                  gutil.colors.red('Unknown revision'),
+                ]);
+              }
               gutil.log(gutil.colors.yellow(str));
               gutil.log(gutil.colors.red("Error:"), err3);
               return callback(err3);
