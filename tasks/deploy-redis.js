@@ -15,7 +15,6 @@ var getRedisClient = require('./utils').getRedisClient;
 
 function uploadFile(config, file, rev) {
   getRedisClient(config, function(client) {
-    console.log(util.format(config.indexKey, rev), util.format(config.metaKey, rev));
     client.set(util.format(config.indexKey, rev), file);
     client.set(util.format(config.metaKey, rev), 'from ' + os.hostname() + ' on ' + new Date);
     client.end();
