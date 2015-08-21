@@ -28,7 +28,8 @@
     "list-revs": "bin/list-revs",
     "slack-notify": "bin/slack-notify",
     "deploy-redis": "bin/deploy-redis",
-    "deploy-s3": "bin/deploy-s3"
+    "deploy-s3": "bin/deploy-s3",
+    "rollbar-source-map": "bin/rollbar-source-map"
   },
   "scripts": {
     "build": "./node_modules/.bin/gulp clean && ./node_modules/.bin/gulp webpack",

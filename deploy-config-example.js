@@ -82,9 +82,18 @@ var config = {
   },
 
   rollbar: {
-    development: secrets.rollbar.development,
-    staging: secrets.rollbar.staging,
-    production: secrets.rollbar.production,
+    development: {
+      minifiedUrl: 'http://cdn.example.com/assets/main-%s.js',
+      accessToken: secrets.rollbar.development.accessToken,
+    },
+    staging: {
+      minifiedUrl: 'http://cdn.example.com/assets/main-%s.js',
+      accessToken: secrets.rollbar.staging.accessToken,
+    },
+    production: {
+      minifiedUrl: 'http://cdn.example.com/assets/main-%s.js',
+      accessToken: secrets.rollbar.production.accessToken,
+    }
   },
 
   slack: {

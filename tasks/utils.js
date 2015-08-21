@@ -30,7 +30,7 @@ var env = function() {
 module.exports.env = env;
 
 module.exports.hash = function() {
-  return argv.hash || 'dev';
+  return argv.hash;
 };
 
 module.exports.getRevision = function(cb) {
