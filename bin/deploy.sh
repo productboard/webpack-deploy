@@ -42,6 +42,7 @@ esac
 COMMIT=`git rev-parse --short HEAD`
 BRANCH=`git rev-parse --abbrev-ref HEAD`
 REV="$COMMIT"
+HASH=`cat build.log 2>/dev/null | grep Hash: | cut -d' ' -f2`
 
 if [ $BRANCH == "dev" -o $BRANCH == "master" ]; then
   echo "Deploying with commit hash $REV\n"
@@ -50,21 +51,25 @@ else
   echo "Deploying branch $BRANCH\n"
 fi
 
+if [ "x$HASH" != "x" ]; then
+  echo "Detected build hash $HASH\n"
+else
+  echo "No build hash detected. Save your Webpack build log into build.log\n"
+fi
 
 gulp_config() {
   gulp --gulpfile "$DIRNAME/../gulpfile.js" --cwd=$PWD $@
 }
 
-# TODO: detect/get build hash
-# npm run build
-# HASH=`ls dist/assets/main-*.js 2>/dev/null | cut -f3 -d'/' | cut -f2 -d'-' | cut -f1 -d'.'`
-
 gulp_config deploy-s3 --env=$ENV
+
+[ "x$HASH" != "x" ] && \
 gulp_config rollbar-source-map --hash=$HASH --env=$ENV --rev=$REV
+
 gulp_config deploy-redis --env=$ENV --rev=$REV
-if [ $ENV != "development" ]; then
-  gulp_config slack-notify --env=$ENV --rev=$REV
-fi
+
+[ "$ENV" != "development" ] && \
+gulp_config slack-notify --env=$ENV --rev=$REV
 
 echo "\nDeploy into $ENV environment took ${SECONDS}s.\n"
 
