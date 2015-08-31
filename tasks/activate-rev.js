@@ -2,7 +2,7 @@ var gulp = require('gulp');
 var util = require('util');
 var gutil = require('gulp-util');
 
-var argv = require('yargs').argv;
+var argv = require('yargs').string('rev').argv;
 
 var env = require('./utils').env;
 var getRevision = require('./utils').getRevision;

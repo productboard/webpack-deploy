@@ -4,7 +4,7 @@ var gutil = require('gulp-util');
 
 var redis = require('redis');
 var revision = require('git-rev');
-var argv = require('yargs').argv;
+var argv = require('yargs').string('rev').argv;
 
 var CONFIG_FILENAME = 'deploy-config.js';
 
