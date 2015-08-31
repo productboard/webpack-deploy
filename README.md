@@ -35,3 +35,8 @@ Slack channel notifier.
 
 ### Why Bash with Gulp?
 Gulp is great for building, Bash for running tasks.
+
+## TODO
+- list deployed feature branches
+- init: config copy
+- username for slack: https://github.com/sindresorhus/username
