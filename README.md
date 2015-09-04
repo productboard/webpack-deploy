@@ -40,3 +40,4 @@ Gulp is great for building, Bash for running tasks.
 - list deployed feature branches
 - init: config copy
 - username for slack: https://github.com/sindresorhus/username
+- tag deployed commits; date based??

@@ -1,4 +1,5 @@
 var request = require('request');
+var fs = require('fs');
 var util = require('util');
 var gulp = require('gulp');
 var gutil = require('gulp-util');
@@ -13,26 +14,31 @@ gulp.task('rollbar-source-map', function(callback) {
   var config = getConfigFor('rollbar');
   var buildHash = hash();
   var url = util.format(config.minifiedUrl, buildHash);
+  var sourceMap = fs.createReadStream(util.format(config.sourceMapPath, buildHash));
 
   if (buildHash) {
-    // curl https://api.rollbar.com/api/1/sourcemap/download \
+    // curl https://api.rollbar.com/api/1/sourcemap \
     // -F access_token=aaaabbbbccccddddeeeeffff00001111 \
-    // -F version=92429d82a41e930486c6de5ebda9602d55c39986 \
-    // -F minified_url=http://example.com/static/js/example.min.js
+    // -F version=version_string_here \
+    // -F minified_url=http://example.com/static/js/example.min.js \
+    // -F source_map=@static/js/example.min.map
     getRevision(function (rev) {
-      request.post({url: 'https://api.rollbar.com/api/1/sourcemap/download', form: {
-        'access_token': config.accessToken,
-        'version': rev,
-        'minified_url': url,
-      }}, callback)
+      request.post({
+        url: 'https://api.rollbar.com/api/1/sourcemap',
+        formData: {
+          'access_token': config.accessToken,
+          'version': rev,
+          'minified_url': url,
+          'source_map': sourceMap,
+        }
+      }, callback)
       .on('response', function(data) {
           data.on('data', function(all) {
             var d;
             try {
               d = JSON.parse(all);
             } catch(e) {}
-
-            if (data.statusCode === 200 && d && d.result && d.result.msg) {
+            if (data.statusCode === 200 && d && !d.err && d.result) {
               gutil.log(gutil.colors.yellow(env()), 'Source map download queued.');
               gutil.log('URL:', url);
               gutil.log(gutil.colors.green('rev:', rev));

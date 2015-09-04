@@ -84,14 +84,17 @@ var config = {
   rollbar: {
     development: {
       minifiedUrl: 'http://cdn.example.com/assets/main-%s.js',
+      sourceMapPath: 'dist/assets/main-%s.map',
       accessToken: secrets.rollbar.development.accessToken,
     },
     staging: {
       minifiedUrl: 'http://cdn.example.com/assets/main-%s.js',
+      sourceMapPath: 'dist/assets/main-%s.map',
       accessToken: secrets.rollbar.staging.accessToken,
     },
     production: {
       minifiedUrl: 'http://cdn.example.com/assets/main-%s.js',
+      sourceMapPath: 'dist/assets/main-%s.map',
       accessToken: secrets.rollbar.production.accessToken,
     }
   },
