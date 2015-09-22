@@ -41,6 +41,6 @@ Gulp is great for building, Bash for running tasks.
 - init: config copy
 - username for slack: https://github.com/sindresorhus/username
 - tag deployed commits; date based??
-- 
+
 ## License
 MIT
