@@ -1,6 +1,6 @@
 {
   "name": "webpack-deploy",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Collection of useful utilities for deploying (not only) Webpack apps",
   "main": "index.js",
   "repository": {
