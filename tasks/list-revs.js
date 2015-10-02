@@ -26,7 +26,7 @@ function printAllRevs(config) {
         gutil.log(gutil.colors.yellow(env()), 'List of deployed revisions:');
 
         var getRev = function(rev, callback) {
-          var revHash = rev.substr(4);
+          var revHash = rev.substr(rev.indexOf(':') + 1);
           if (revHash === 'current') return callback();
 
           gitlog({
