@@ -39,7 +39,7 @@ gulp.task('rollbar-source-map', function(callback) {
               d = JSON.parse(all);
             } catch(e) {}
             if (data.statusCode === 200 && d && !d.err && d.result) {
-              gutil.log(gutil.colors.yellow(env()), 'Source map download queued.');
+              gutil.log(gutil.colors.yellow(env()), 'Source map uploaded.');
               gutil.log('URL:', url);
               gutil.log(gutil.colors.green('rev:', rev));
             } else {
