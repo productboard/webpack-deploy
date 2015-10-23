@@ -44,6 +44,7 @@ Gulp is great for building, Bash for running tasks.
 - rollbar deploy notification: https://rollbar.com/docs/deploys_bash/
 - optional deploy message (for slack)
 - list commits in slack message
+- provide reference backend code snippet
 
 ## License
 MIT
