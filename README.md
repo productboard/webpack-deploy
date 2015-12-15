@@ -10,6 +10,7 @@ npm install --save-dev productboard/webpack-deploy
 ## Configuration
 Copy `deploy-config-example.js` and `secrets-example.js` into the root of your
 project and fit them to your needs.
+Also make sure you have `./node_modules/.bin` in your `$PATH`.
 
 ## Use
 Build your Webpack project and run `deploy [environment]`.
