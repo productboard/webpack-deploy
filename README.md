@@ -45,6 +45,8 @@ Gulp is great for building, Bash for running tasks.
 - optional deploy message (for slack)
 - list commits in slack message
 - provide reference backend code snippet
+- notification center updates
+- friendlier error messages "Did you forget to ...?"
 
 ## License
 MIT
