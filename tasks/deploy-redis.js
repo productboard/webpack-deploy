@@ -15,8 +15,23 @@ var getRedisClient = require('./utils').getRedisClient;
 
 function uploadFile(config, file, rev) {
   getRedisClient(config, function(client) {
+    var timestamp = new Date();
+
+    // Store index file under indexKey, e.g. 'app:<rev-number>'
     client.set(util.format(config.indexKey, rev), file);
-    client.set(util.format(config.metaKey, rev), 'from ' + os.hostname() + ' on ' + new Date);
+
+    // Store timestamp information under 'app-timestamp:<rev-number>'
+    // so we can compare if we have newer version than latest major rev
+    if (config.revTimestampKey) {
+      client.set(util.format(config.revTimestampKey, rev), timestamp);
+    } else {
+      gutil.log(gutil.colors.red(
+        "Missing 'revTimestampKey' in config, unable to store rev timestamp."
+      ));
+    }
+
+    // Store autor and timestamp info under metaKey, e.g. 'meta:<rev-number>'
+    client.set(util.format(config.metaKey, rev), 'from ' + os.hostname() + ' on ' + timestamp);
     client.end();
   });
 }

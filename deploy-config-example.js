@@ -21,6 +21,8 @@ var config = {
       metaKey: 'meta:%s',
       mainIndexKey: 'app:current',
       mainRevKey: 'app:current-revision',
+      revTimestampKey: 'app-timestamp:%s',
+      lastMajorTimestampKey: 'app:last-major-timestamp',
     },
     staging: {
       port:    9999,
@@ -32,6 +34,8 @@ var config = {
       metaKey: 'meta:%s',
       mainIndexKey: 'app:current',
       mainRevKey: 'app:current-revision',
+      revTimestampKey: 'app-timestamp:%s',
+      lastMajorTimestampKey: 'app:last-major-timestamp',
     },
     me: {
       port:    8888,
@@ -43,6 +47,8 @@ var config = {
       metaKey: 'meta:%s',
       mainIndexKey: 'app:current',
       mainRevKey: 'app:current-revision',
+      revTimestampKey: 'app-timestamp:%s',
+      lastMajorTimestampKey: 'app:last-major-timestamp',
     },
     production: {
       port:    7777,
@@ -54,6 +60,8 @@ var config = {
       metaKey: 'meta:%s',
       mainIndexKey: 'app:current',
       mainRevKey: 'app:current-revision',
+      revTimestampKey: 'app-timestamp:%s',
+      lastMajorTimestampKey: 'app:last-major-timestamp',
     }
   },
 
