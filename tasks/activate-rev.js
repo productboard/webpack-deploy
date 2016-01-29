@@ -10,21 +10,31 @@ var getConfigFor = require('./utils').getConfigFor;
 var getRedisClient = require('./utils').getRedisClient;
 
 
-function activateVersion(rev, config) {
+function updateMainRev(config, rev) {
   getRedisClient(config, function(client) {
     client.get(util.format(config.indexKey, rev), function (err, file) {
       if (!file) {
-        gutil.log(gutil.colors.red("Revision " + rev + " not found"));
+        gutil.log(gutil.colors.red("Revision", rev, "for", config.indexKey, "not found"));
       } else if (err) {
         gutil.log(gutil.colors.red("Error:"), err);
       } else {
-        gutil.log(gutil.colors.yellow(env()), 'Activating rev', gutil.colors.green(rev));
+        gutil.log(gutil.colors.yellow(env()), 'Activating rev', gutil.colors.green(rev), 'for', config.indexKey);
         client.set(config.mainIndexKey, file);
         client.set(config.mainRevKey, rev);
       }
       client.end();
     });
   });
+}
+
+function activateVersion(rev, config) {
+  if (config.files) {
+    for (var i = 0, l = config.files.length; i < l; ++i) {
+      updateMainRev(Object.assign({}, config, config.files[i]), rev);
+    }
+  } else {
+    updateMainRev(config, rev);
+  }
 }
 
 /**

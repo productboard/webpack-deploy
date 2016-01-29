@@ -21,13 +21,20 @@ function uploadFile(config, file, rev) {
   });
 }
 
-function deployRedis(config) {
-  var file = fs.readFileSync(config.indexPath, 'utf8');
+function deployRedis(config, rev) {
+  gutil.log(gutil.colors.yellow(env()), 'Uploading revision', gutil.colors.green(rev));
 
-  getRevision(function (rev) {
-    gutil.log(gutil.colors.yellow(env()), 'Uploading revision', gutil.colors.green(rev));
+  if (config.files) {
+    for (var i = 0, l = config.files.length; i < l; ++i) {
+      var fileName = config.files[i].indexPath;
+      gutil.log(gutil.colors.yellow(env()), 'Deploying', gutil.colors.magenta(fileName), '...');
+      var file = fs.readFileSync(fileName, 'utf8');
+      uploadFile(Object.assign({}, config, config.files[i]), file, rev);
+    }
+  } else {
+    var file = fs.readFileSync(config.indexPath, 'utf8');
     uploadFile(config, file, rev);
-  });
+  }
 }
 
 function printCurrentRev() {
@@ -46,6 +53,8 @@ gulp.task('current-rev', [], printCurrentRev);
  * Promotes specified revision as current
  */
 gulp.task('deploy-redis', [], function() {
-  deployRedis(getConfigFor('redis'));
+  getRevision(function (rev) {
+    deployRedis(getConfigFor('redis'), rev);
+  });
 });
 
