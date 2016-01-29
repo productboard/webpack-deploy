@@ -42,7 +42,7 @@ esac
 COMMIT=`git rev-parse --short HEAD`
 BRANCH=`git rev-parse --abbrev-ref HEAD`
 REV="$COMMIT"
-HASH=`cat build.log 2>/dev/null | grep Hash: | cut -d' ' -f2`
+BUILD_COUNT=`ls -a build.*.log 2>/dev/null | cat | wc -l | awk {'print $1'}`
 
 if [ $BRANCH == "dev" -o $BRANCH == "master" ]; then
   echo "Deploying with commit hash $REV\n"
@@ -51,10 +51,15 @@ else
   echo "Deploying branch $BRANCH\n"
 fi
 
-if [ "x$HASH" != "x" ]; then
-  echo "Detected build hash $HASH\n"
+if [[ $BUILD_COUNT -ne 0 ]]; then
+  echo "Detected $BUILD_COUNT build app versions:"
+  for build in build.*.log; do
+    echo "\t`cat "$build" | grep Hash: | cut -d' ' -f2`: `echo $build | cut -d'.' -f2`"
+  done
+  echo
 else
-  echo "No build hash detected. Save your Webpack build log into build.log\n"
+  echo "ERROR: No builds found. Set up Webpack build log into build.[app_buildsion].log\n"
+  exit 1
 fi
 
 gulp_config() {
@@ -63,8 +68,7 @@ gulp_config() {
 
 gulp_config deploy-s3 --env=$ENV
 
-[ "x$HASH" != "x" ] && \
-gulp_config rollbar-source-map --hash=$HASH --env=$ENV --rev=$REV
+gulp_config rollbar-source-map --env=$ENV --rev=$REV
 
 gulp_config deploy-redis --env=$ENV --rev=$REV
 

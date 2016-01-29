@@ -1,0 +1,9 @@
+# dependencies
+/node_modules
+
+# misc
+npm-debug.log
+.DS_Store
+
+# ide, editors
+*.sublime-workspace
