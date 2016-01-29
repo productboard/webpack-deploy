@@ -14,15 +14,15 @@ function messagePayload(config, env, rev) {
   var text = "You can test it by going to <" + link + ">.";
 
   return {
-    "channel": "#hacking",
-    "username": "Deploy Bot",
-    "icon_emoji": ":rocket:",
+    "channel": config.channel || "#hacking",
+    "username": config.botName || "Deploy Bot",
+    "icon_emoji": config.botIconEmoji || ":rocket:",
     "attachments": [
         {
             "title": title,
             "title_link": link,
             "text": text,
-            "color": "#7CD197"
+            "color": config.messageColor || "#7CD197"
         }
     ]
   };
