@@ -95,14 +95,15 @@ function printVersionRevs(config) {
           if (err) {
             gutil.log('Error:', err);
           } else {
-            if (!argv.all) {
-              results = results.slice(Math.max(arr.length - DEFAULT_MAX_COUNT, 1));
-            }
-            results.filter(function(el) {
+            results = results.filter(function(el) {
               return el && el.length > 0;
             }).sort(function(a, b) {
               return a[0] - b[0];
-            }).map(function(el) {
+            });
+            if (!argv.all) {
+              results = results.slice(Math.max(arr.length - DEFAULT_MAX_COUNT, 1));
+            }
+            results.map(function(el) {
               console.log.apply(console, el.splice(1));
             });
           }
