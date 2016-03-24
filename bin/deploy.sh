@@ -42,7 +42,7 @@ esac
 COMMIT=`git rev-parse --short HEAD`
 BRANCH=`git rev-parse --abbrev-ref HEAD`
 REV="$COMMIT"
-BUILD_COUNT=`ls -a build.*.log 2>/dev/null | cat | wc -l | awk {'print $1'}`
+BUILD_COUNT=`ls -a build*log 2>/dev/null | cat | wc -l | awk {'print $1'}`
 
 if [ $BRANCH == "dev" -o $BRANCH == "master" ]; then
   echo "Deploying with commit hash $REV\n"
@@ -53,12 +53,13 @@ fi
 
 if [[ $BUILD_COUNT -ne 0 ]]; then
   echo "Detected $BUILD_COUNT build app versions:"
-  for build in build.*.log; do
+  for build in build*log; do
     echo "\t`cat "$build" | grep Hash: | cut -d' ' -f2`: `echo $build | cut -d'.' -f2`"
   done
   echo
 else
-  echo "ERROR: No builds found. Set up Webpack build log into build.[app_buildsion].log\n"
+  echo "ERROR: No builds found. Set up Webpack stats log into build.[app_buildsion].log"
+  echo "See https://webpack.github.io/docs/node.js-api.html#stats-tostring\n"
   exit 1
 fi
 
