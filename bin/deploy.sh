@@ -44,7 +44,7 @@ BRANCH=`git rev-parse --abbrev-ref HEAD`
 REV="$COMMIT"
 BUILD_COUNT=`ls -a build*log 2>/dev/null | cat | wc -l | awk {'print $1'}`
 
-if [ $BRANCH == "dev" -o $BRANCH == "master" ]; then
+if [ $BRANCH == "dev" -o $BRANCH == "master" -o $BRANCH == "HEAD" ]; then
   echo "Deploying with commit hash $REV\n"
 else
   REV="branch/$BRANCH"
