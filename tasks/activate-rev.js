@@ -47,13 +47,13 @@ function updateMainRev(config, rev, majorRelease) {
   });
 }
 
-function activateVersion(rev, config) {
+function activateVersion(rev, config, majorRelease) {
   if (config.files) {
     for (var i = 0, l = config.files.length; i < l; ++i) {
-      updateMainRev(Object.assign({}, config, config.files[i]), rev);
+      updateMainRev(Object.assign({}, config, config.files[i]), rev, majorRelease);
     }
   } else {
-    updateMainRev(config, rev);
+    updateMainRev(config, rev, majorRelease);
   }
 }
 
