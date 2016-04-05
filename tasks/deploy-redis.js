@@ -32,7 +32,7 @@ function uploadFile(config, file, rev) {
 
     // Store autor and timestamp info under metaKey, e.g. 'meta:<rev-number>'
     client.set(util.format(config.metaKey, rev), 'from ' + os.hostname() + ' on ' + timestamp);
-    client.end();
+    client.quit();
   });
 }
 

@@ -108,7 +108,7 @@ function printVersionRevs(config) {
             });
           }
 
-          client.end();
+          client.quit();
         });
 
       });
