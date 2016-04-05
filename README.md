@@ -40,7 +40,6 @@ Gulp is great for building, Bash for running tasks.
 ## TODO
 - list deployed feature branches
 - init: config copy
-- username for slack: https://github.com/sindresorhus/username
 - tag deployed commits; date based??
 - rollbar deploy notification: https://rollbar.com/docs/deploys_bash/
 - optional deploy message (for slack)
@@ -48,6 +47,7 @@ Gulp is great for building, Bash for running tasks.
 - provide reference backend code snippet
 - notification center updates
 - friendlier error messages "Did you forget to ...?"
+- abstract slack notifs into utils
 
 ## License
 MIT
