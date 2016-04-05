@@ -4,6 +4,7 @@ var gutil = require('gulp-util');
 
 var redis = require('redis');
 var revision = require('git-rev');
+var fullname = require('fullname');
 var argv = require('yargs').string('rev').argv;
 
 var CONFIG_FILENAME = 'deploy-config.js';
@@ -48,4 +49,8 @@ module.exports.getRedisClient = function(config, callback) {
     if (err) { gutil.log(gutil.colors.red("Error:"), err); }
     callback(client);
   });
+};
+
+module.exports.getFullName = function(cb) {
+  fullname().then(cb);
 };

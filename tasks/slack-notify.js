@@ -6,33 +6,51 @@ var argv = require('yargs').string('rev').argv;
 
 var getRevision = require('./utils').getRevision;
 var getConfigFor = require('./utils').getConfigFor;
+var getFullName = require('./utils').getFullName;
 
 
-function messagePayload(config, env, rev) {
-  var title = "New frontend revision " + rev + " was deployed on " + env + " from " + os.hostname() + "." ;
+function messagePayload(config, env, rev, fullname) {
+  var hostname = os.hostname();
+  var fallback = "New frontend revision " + rev + " was deployed on " + env + " by " + fullname + " from " + hostname + ".";
+  var text = "New frontend revision deployed!";
   var link = config.url + "/?rev=" + rev;
-  var text = "You can test it by going to <" + link + ">.";
 
   return {
     "channel": config.channel || "#hacking",
     "username": config.botName || "Deploy Bot",
     "icon_emoji": config.botIconEmoji || ":rocket:",
-    "attachments": [
-        {
-            "title": title,
-            "title_link": link,
-            "text": text,
-            "color": config.messageColor || "#7CD197"
-        }
-    ]
+    "attachments": [{
+      fallback: fallback,
+      "pretext": text,
+      "color": config.messageColor || "#7CD197",
+      "fields": [{
+        "title": "Revision",
+        "value": rev,
+        "short": true
+      }, {
+        "title": "Environment",
+        "value": env,
+        "short": true
+      }, {
+        "title": "URL",
+        "value": link,
+        "short": true
+      }, {
+        "title": "Author",
+        "value": fullname + " (" + hostname + ")",
+        "short": true
+      }]
+    }]
   };
 }
 
 function notifyRevDeployed(config) {
   if (argv.env) {
     getRevision(function (rev) {
-      var payload = messagePayload(config, argv.env, rev);
-      return request.post(config.notifyWebHook).send(payload).end();
+      getFullName(function (name) {
+        var payload = messagePayload(config, argv.env, rev, name);
+        request.post(config.notifyWebHook).send(payload).end();
+      });
     });
   } else {
     gutil.log(gutil.colors.red('No environment provided to Slack Notify'));
@@ -43,5 +61,5 @@ function notifyRevDeployed(config) {
  * Prints current revision number used as a redis key
  */
 gulp.task('slack-notify', [], function() {
-  return notifyRevDeployed(getConfigFor('slack'));
+  notifyRevDeployed(getConfigFor('slack'));
 });

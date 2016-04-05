@@ -39,6 +39,7 @@
   "dependencies": {
     "async": "^1.4.2",
     "autoprefixer-core": "^5.2.1",
+    "fullname": "^3.0.0",
     "git-rev": "^0.2.1",
     "gitlog": "^2.0.1",
     "glob": "^6.0.4",
