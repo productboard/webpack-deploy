@@ -11,69 +11,76 @@ var getRedisClient = require('./utils').getRedisClient;
 
 var notifyRevActivated = require('./slack-notify').notifyRevActivated;
 
-function updateMainRev(config, rev, majorRelease, cb) {
-  getRedisClient(config, function(client) {
-    client.get(util.format(config.indexKey, rev), function (err, file) {
-      if (!file) {
-        gutil.log(gutil.colors.red("Revision", rev, "for", config.indexKey, "not found"));
-        if (typeof cb === 'function') cb();
-      } else if (err) {
-        gutil.log(gutil.colors.red("Error:"), err);
-        if (typeof cb === 'function') cb();
-      } else {
-        gutil.log(gutil.colors.yellow(env()), 'Activating rev', gutil.colors.green(rev), 'for', config.indexKey);
-        client.set(config.mainIndexKey, file);
-        client.set(config.mainRevKey, rev);
+function updateMainRev(client, config, rev, majorRelease, cb) {
+  client.get(util.format(config.indexKey, rev), function (err, file) {
+    if (!file) {
+      gutil.log(gutil.colors.red("Revision", rev, "for", config.indexKey, "not found"));
+      if (typeof cb === 'function') cb();
+    } else if (err) {
+      gutil.log(gutil.colors.red("Error:"), err);
+      if (typeof cb === 'function') cb();
+    } else {
+      gutil.log(gutil.colors.yellow(env()), 'Activating rev', gutil.colors.green(rev), 'for', config.indexKey);
+      client.set(config.mainIndexKey, file);
+      client.set(config.mainRevKey, rev);
 
-        // If the rev is marked as a major release, update the timestamp in Redis
-        // under <lastMajorTimestampKey>
-        if (majorRelease) {
-          if (!config.revTimestampKey || !config.lastMajorTimestampKey) {
-            gutil.log(gutil.colors.red(
-              "Missing 'revTimestampKey' or 'lastMajorTimestampKey' keys " +
-              "in config, unable to mark rev as major release."
-            ));
-          }
-
-          client.get(util.format(config.revTimestampKey, rev), function(err, timestamp) {
-            if (!timestamp) {
-              gutil.log(gutil.colors.red("Revision timestamp not found"));
-            } else if (err) {
-              gutil.log(gutil.colors.red("Error:"), err);
-            } else {
-              client.set(config.lastMajorTimestampKey, timestamp);
-            }
-            if (typeof cb === 'function') cb();
-          });
-        } else if (typeof cb === 'function') {
-          cb();
+      // If the rev is marked as a major release, update the timestamp in Redis
+      // under <lastMajorTimestampKey>
+      if (majorRelease) {
+        if (!config.revTimestampKey || !config.lastMajorTimestampKey) {
+          gutil.log(gutil.colors.red(
+            "Missing 'revTimestampKey' or 'lastMajorTimestampKey' keys " +
+            "in config, unable to mark rev as major release."
+          ));
         }
+
+        client.get(util.format(config.revTimestampKey, rev), function(err, timestamp) {
+          if (!timestamp) {
+            gutil.log(gutil.colors.red("Revision timestamp not found"));
+            if (typeof cb === 'function') cb();
+          } else if (err) {
+            gutil.log(gutil.colors.red("Error:"), err);
+            if (typeof cb === 'function') cb();
+          } else {
+            client.set(config.lastMajorTimestampKey, timestamp, function() {
+              if (typeof cb === 'function') cb();
+            });
+          }
+        });
+      } else if (typeof cb === 'function') {
+        cb();
       }
-      client.quit();
-    });
+    }
   });
 }
 
 function activateVersion(rev, config, majorRelease) {
   var notifyEnabled = argv.notify;
-  var slackNotify = function() {
-    var targetEnv = env();
-    notifyRevActivated(getConfigFor('slack'), targetEnv, majorRelease);
-  };
-
-  if (config.files) {
+  getRedisClient(config, function(redis) {
+    var quitRedis = function() { redis.quit(); };
+    var slackNotify = function() {
+      var targetEnv = env();
+      notifyRevActivated(getConfigFor('slack'), targetEnv, majorRelease);
+    };
     // Async queue
-    var totalTasks = config.files.length;
+    var totalTasks = config.files ? config.files.length : 1;
     var done = 0;
     var doneTask = function() {
-      if (++done >= totalTasks) slackNotify();
+      if (++done >= totalTasks) {
+        quitRedis();
+        if (notifyEnabled) {
+          slackNotify();
+        }
+      }
     };
-    for (var i = 0, l = totalTasks; i < l; ++i) {
-      updateMainRev(Object.assign({}, config, config.files[i]), rev, majorRelease, notifyEnabled && doneTask);
+    if (config.files) {
+      for (var i = 0, l = totalTasks; i < l; ++i) {
+        updateMainRev(redis, Object.assign({}, config, config.files[i]), rev, majorRelease, doneTask);
+      }
+    } else {
+      updateMainRev(redis, config, rev, majorRelease, doneTask);
     }
-  } else {
-    updateMainRev(config, rev, majorRelease, notifyEnabled && slackNotify);
-  }
+  });
 }
 
 /**
