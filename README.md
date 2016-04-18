@@ -38,6 +38,8 @@ Slack channel notifier.
 Gulp is great for building, Bash for running tasks.
 
 ## TODO
+- forbid rev redeploy; force with --force
+- add example ala https://github.com/FormidableLabs/webpack-stats-plugin
 - list deployed feature branches
 - init: config copy
 - tag deployed commits; date based??
