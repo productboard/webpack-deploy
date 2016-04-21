@@ -1,6 +1,9 @@
-#!/bin/sh
+#!/bin/bash
 # dont execute next commands on error
 trap 'exit' ERR
+
+# let echo interpret escape chars (\n)
+shopt -s xpg_echo
 
 # http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
 set_dirname() {
