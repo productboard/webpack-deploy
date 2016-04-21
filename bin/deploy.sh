@@ -5,6 +5,18 @@ trap 'exit' ERR
 # let echo interpret escape chars (\n)
 shopt -s xpg_echo
 
+GULP="`npm bin`/gulp"
+
+if [[ ! -x "$GULP" ]]; then
+  echo "ERROR: gulp executable not found"
+  echo "Check path for valid executable: $GULP"
+  exit 1
+fi
+
+gulp_config() {
+  $GULP --gulpfile "$DIRNAME/../gulpfile.js" --cwd=$PWD $@
+}
+
 # http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
 set_dirname() {
   SOURCE="${BASH_SOURCE[0]}"
@@ -65,10 +77,6 @@ else
   echo "See https://webpack.github.io/docs/node.js-api.html#stats-tostring\n"
   exit 1
 fi
-
-gulp_config() {
-  gulp --gulpfile "$DIRNAME/../gulpfile.js" --cwd=$PWD $@
-}
 
 gulp_config deploy-s3 --env=$ENV
 
