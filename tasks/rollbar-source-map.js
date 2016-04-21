@@ -154,7 +154,7 @@ function uploadAppVersions(config, rev, callback) {
       }
       var buff = new Buffer(64);
       fs.read(fd, buff, 0, 64, 0, function(err, read) {
-        if (err || read < 64) {
+        if (err) {
           gutil.log('ERROR: Cannot read', file);
           readingDone();
           return;
