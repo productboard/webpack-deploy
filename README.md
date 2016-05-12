@@ -38,11 +38,13 @@ Slack channel notifier.
 Gulp is great for building, Bash for running tasks.
 
 ## TODO
+- build sample app in monolithic repo
 - forbid rev redeploy; force with --force
 - add example ala https://github.com/FormidableLabs/webpack-stats-plugin
 - list deployed feature branches
 - init: config copy
 - tag deployed commits; date based??
+- github PR deploy notification: https://developer.github.com/changes/2014-01-09-preview-the-new-deployments-api/
 - rollbar deploy notification: https://rollbar.com/docs/deploys_bash/
 - optional deploy message (for slack)
 - list commits in slack message
