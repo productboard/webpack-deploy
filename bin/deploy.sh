@@ -84,6 +84,8 @@ gulp_config rollbar-source-map --env=$ENV --rev=$REV
 
 gulp_config deploy-redis --env=$ENV --rev=$REV
 
+gulp_config git-deploy-tag --env=$ENV --rev=$REV
+
 [ "$ENV" != "development" ] && \
 gulp_config slack-notify --env=$ENV --rev=$REV
 

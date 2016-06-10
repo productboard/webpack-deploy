@@ -31,6 +31,8 @@ List of deployed revisions with meta information.
 Rollbar source map upload.
 - `slack-notify`
 Slack channel notifier.
+- `git-deploy-tag`
+Git tag creation and push to remote.
 
 ## Other
 
@@ -43,7 +45,6 @@ Gulp is great for building, Bash for running tasks.
 - add example ala https://github.com/FormidableLabs/webpack-stats-plugin
 - list deployed feature branches
 - init: config copy
-- tag deployed commits; date based??
 - github PR deploy notification: https://developer.github.com/changes/2014-01-09-preview-the-new-deployments-api/
 - rollbar deploy notification: https://rollbar.com/docs/deploys_bash/
 - optional deploy message (for slack)
@@ -52,6 +53,8 @@ Gulp is great for building, Bash for running tasks.
 - notification center updates
 - friendlier error messages "Did you forget to ...?"
 - abstract slack notifs into utils
+- disallow activation of feature branches?
+- get rid of the callback hell
 
 ## License
 MIT

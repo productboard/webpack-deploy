@@ -118,6 +118,13 @@ var config = {
     },
   },
 
+  git: {
+    staging: {
+      url: 'https://staging.example.com',
+      remote: 'origin',
+    }
+  },
+
 };
 
 module.exports = config;

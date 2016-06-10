@@ -1,5 +1,6 @@
 var path = require('path');
 var fs = require('fs');
+var exec = require('child_process').exec;
 var gutil = require('gulp-util');
 
 var redis = require('redis');
@@ -53,4 +54,12 @@ module.exports.getRedisClient = function(config, callback) {
 
 module.exports.getFullName = function(cb) {
   fullname().then(cb);
+};
+
+module.exports.createTag = function(name, message, cb) {
+  exec('git tag -a "'+name+'" -m "' + message + '"', cb);
+};
+
+module.exports.pushTag = function(name, remote, cb) {
+  exec('git push "'+remote+'" "'+name+'"', cb);
 };

@@ -1,0 +1,4 @@
+#!/usr/bin/env node
+var path = require('path');
+require(path.join(__dirname, '..', 'tasks', 'git-deploy-tag'));
+require('gulp').start('git-deploy-tag');
