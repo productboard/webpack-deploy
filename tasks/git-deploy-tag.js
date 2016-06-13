@@ -1,9 +1,9 @@
 var gulp = require('gulp');
 var os = require('os');
 var gutil = require('gulp-util');
+var revision = require('git-rev');
 
 var env = require('./utils').env;
-var getRevision = require('./utils').getRevision;
 var getConfigFor = require('./utils').getConfigFor;
 var createTag = require('./utils').createTag;
 var pushTag = require('./utils').pushTag;
@@ -34,7 +34,8 @@ function createGitTag(config, rev, callback) {
  * Promotes specified revision as current
  */
 gulp.task('git-deploy-tag', [], function(callback) {
-  getRevision(function (rev) {
+  // Always take the commit hash; ignore --rev argument
+  revision.short(function (rev) {
     createGitTag(getConfigFor('git'), rev, callback);
   });
 });
