@@ -1,3 +1,4 @@
+var path = require('path');
 var gulp = require('gulp');
 var rename = require('gulp-rename');
 var aws = require('gulp-awspublish');
@@ -29,8 +30,8 @@ var deployS3 = function(config) {
   var headers = { 'Cache-Control': 'max-age=315360000, no-transform, public' };
 
   return gulp.src(config.assetsPath)
-    .pipe(rename(function (path) {
-      path.dirname += config.dirname;
+    .pipe(rename(function (filepath) {
+      filepath.dirname = path.join(config.dirname, filepath.dirname);
     }))
      // gzip, Set Content-Encoding headers and add .gz extension
     .pipe(aws.gzip())
