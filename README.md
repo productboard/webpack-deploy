@@ -40,6 +40,7 @@ Git tag creation and push to remote.
 Gulp is great for building, Bash for running tasks.
 
 ## TODO
+- reupload/rewrite source map upload to fix activation of feature branches
 - build sample app in monolithic repo
 - forbid rev redeploy; force with --force
 - add example ala https://github.com/FormidableLabs/webpack-stats-plugin
