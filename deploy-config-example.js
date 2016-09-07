@@ -71,6 +71,9 @@ var config = {
       credentials: s3Credential,
       dirname: '/development/assets',
       assetsPath: 'dist/assets/*',
+      headers: {
+        'Cache-Control': 'max-age=0' // explicitly set metadata for resource in S3
+      }
     },
     staging: {
       credentials: s3Credential,
@@ -128,4 +131,3 @@ var config = {
 };
 
 module.exports = config;
-
