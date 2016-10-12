@@ -80,7 +80,7 @@ fi
 
 gulp_config deploy-s3 --env=$ENV
 
-gulp_config rollbar-source-map --env=$ENV --rev=$REV
+gulp_config rollbar-source-map --env=$ENV --rev=$COMMIT
 
 gulp_config deploy-redis --env=$ENV --rev=$REV
 
