@@ -57,6 +57,7 @@ Gulp is great for building, Bash for running tasks.
 - disallow activation of feature branches?
 - get rid of the callback hell
 - deploy tags don't work well with feature branches, they keep overwriting
+- integrate new deploy info command
 
 ## License
 MIT

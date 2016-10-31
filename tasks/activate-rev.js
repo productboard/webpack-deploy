@@ -42,6 +42,7 @@ function updateMainRev(client, config, rev, majorRelease, cb) {
             gutil.log(gutil.colors.red("Error:"), err);
             if (typeof cb === 'function') cb();
           } else {
+            gutil.log(gutil.colors.yellow(env()), 'Setting major timestamp', gutil.colors.green(timestamp));
             client.set(config.lastMajorTimestampKey, timestamp, function() {
               if (typeof cb === 'function') cb();
             });
