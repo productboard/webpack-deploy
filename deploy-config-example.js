@@ -119,6 +119,7 @@ var config = {
   },
 
   git: {
+    abbrev: 7,
     staging: {
       url: 'https://staging.example.com',
       remote: 'origin',

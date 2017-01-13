@@ -54,7 +54,8 @@ case "$ENV" in
   exit 1
 esac
 
-COMMIT=`git rev-parse --short HEAD`
+ABBREV_LENGTH=`node ${DIRNAME}/../tasks/config-abbrev`
+COMMIT=`git rev-parse --short=${ABBREV_LENGTH} HEAD`
 BRANCH=`git rev-parse --abbrev-ref HEAD`
 REV="$COMMIT"
 BUILD_COUNT=`ls -a build*log 2>/dev/null | cat | wc -l | awk {'print $1'}`
