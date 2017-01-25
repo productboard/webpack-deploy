@@ -98,7 +98,9 @@ module.exports.notifyRevActivated = function notifyRevActivated(config, env, maj
     getRevision(function (rev) {
       getFullName(function (name) {
         var payload = activatedPayload(config, env, rev, name, majorRelease);
-        request.post(config.notifyWebHook).send(payload).end();
+        if (config.notifyWebHook) {
+          request.post(config.notifyWebHook).send(payload).end();
+        }
       });
     });
   } else {

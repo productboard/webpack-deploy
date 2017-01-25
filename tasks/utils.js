@@ -8,22 +8,27 @@ var revision = require('git-rev');
 var fullname = require('fullname');
 var argv = require('yargs').string('rev').argv;
 
+var DEFAULT_ABBREV_LENGTH = 7;
 var CONFIG_FILENAME = 'deploy-config.js';
+var CONFIG_PATHS = [
+  path.join(process.cwd(), CONFIG_FILENAME),
+  path.join(__dirname, '..', CONFIG_FILENAME)
+];
+var deployConfig = null;
 
-function requireConfig(filename) {
-  gutil.log('Using config file ' + gutil.colors.magenta(filename));
-  return require(filename);
-}
+function requireConfig(silent) {
+  var filename = CONFIG_PATHS.find(function(configPath) {
+    return fs.existsSync(configPath);
+  });
 
-if (fs.existsSync(path.join(process.cwd(), CONFIG_FILENAME))) {
-  var deployConfig = requireConfig(path.join(process.cwd(), CONFIG_FILENAME));
-} else if (fs.existsSync(path.join(__dirname, '..', CONFIG_FILENAME))) {
-  var deployConfig = requireConfig(path.join(__dirname, '..', CONFIG_FILENAME));
-} else {
+  if (filename) {
+    !silent && gutil.log('Using config file ' + gutil.colors.magenta(filename));
+    return require(filename);
+  }
+
   gutil.log(gutil.colors.red('No "' + CONFIG_FILENAME + '" provided'));
   process.exit(1);
 }
-
 
 var env = function() {
   return argv.env || 'development';
@@ -37,10 +42,16 @@ module.exports.hash = function() {
 
 module.exports.getRevision = function(cb) {
   if (typeof argv.rev === 'string' && argv.rev !== 'current' && cb) cb(argv.rev);
-  else revision.short(cb);
+  else revision.long(function (rev) {
+    var abbrevLength = getConfigFor('git').abbrev || DEFAULT_ABBREV_LENGTH;
+    cb(rev.substr(0, abbrevLength));
+  });
 };
 
-module.exports.getConfigFor = function(prop) {
+module.exports.getConfigFor = function(prop, silent) {
+  if (!deployConfig) {
+    deployConfig = requireConfig(silent);
+  }
   return deployConfig[prop] && deployConfig[prop][env()] || deployConfig[prop];
 };
 
