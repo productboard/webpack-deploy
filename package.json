@@ -49,7 +49,7 @@
     "gulp-clean": "^0.3.1",
     "gulp-rename": "^1.2.2",
     "gulp-svgmin": "^1.2.0",
-    "gulp-svgstore": "^5.0.4",
+    "gulp-svgstore": "^5.0.5",
     "gulp-util": "^3.0.6",
     "gulp-webpack": "^1.5.0",
     "html-webpack-plugin": "^1.6.1",
