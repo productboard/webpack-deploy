@@ -55,7 +55,9 @@ case "$ENV" in
 esac
 
 ABBREV_LENGTH=`node ${DIRNAME}/../tasks/config-abbrev`
+ROLLBAR_ABBREV=`node ${DIRNAME}/../tasks/config-rollbar-abbrev`
 COMMIT=`git rev-parse --short=${ABBREV_LENGTH} HEAD`
+COMMIT_ROLLBAR=`git rev-parse --short=${ROLLBAR_ABBREV} HEAD`
 BRANCH=`git rev-parse --abbrev-ref HEAD`
 REV="$COMMIT"
 BUILD_COUNT=`ls -a build*log 2>/dev/null | cat | wc -l | awk {'print $1'}`
@@ -81,7 +83,7 @@ fi
 
 gulp_config deploy-s3 --env=$ENV
 
-gulp_config rollbar-source-map --env=$ENV --rev=$COMMIT
+gulp_config rollbar-source-map --env=$ENV --rev=$COMMIT_ROLLBAR
 
 gulp_config deploy-redis --env=$ENV --rev=$REV
 
