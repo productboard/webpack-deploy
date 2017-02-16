@@ -54,8 +54,8 @@ case "$ENV" in
   exit 1
 esac
 
-ABBREV_LENGTH=`node ${DIRNAME}/../tasks/config-abbrev`
-ROLLBAR_ABBREV=`node ${DIRNAME}/../tasks/config-rollbar-abbrev`
+ABBREV_LENGTH=`node ${DIRNAME}/../tasks/config-abbrev --env=$ENV`
+ROLLBAR_ABBREV=`node ${DIRNAME}/../tasks/config-rollbar-abbrev --env=$ENV`
 COMMIT=`git rev-parse --short=${ABBREV_LENGTH} HEAD`
 COMMIT_ROLLBAR=`git rev-parse --short=${ROLLBAR_ABBREV} HEAD`
 BRANCH=`git rev-parse --abbrev-ref HEAD`
