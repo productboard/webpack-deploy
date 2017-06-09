@@ -27,7 +27,8 @@ var deployS3 = function(config) {
   var publisher = aws.create(config.credentials);
 
   // define custom headers
-  var headers = { 'Cache-Control': 'max-age=315360000, no-transform, public' };
+
+  var headers = config.headers? config.headers : { 'Cache-Control': 'max-age=315360000, no-transform, public' };
 
   return gulp.src(config.assetsPath)
     .pipe(rename(function (filepath) {
