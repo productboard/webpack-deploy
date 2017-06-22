@@ -83,8 +83,9 @@ function getConfigFor(prop, silent) {
   if (!deployConfig) {
     deployConfig = requireConfig(silent);
   }
-  return (deployConfig[prop] && deployConfig[prop][env()]) ||
-    deployConfig[prop];
+  return (
+    (deployConfig[prop] && deployConfig[prop][env()]) || deployConfig[prop]
+  );
 }
 
 module.exports.getConfigFor = getConfigFor;

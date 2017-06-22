@@ -73,7 +73,8 @@ async function activateVersion(rev, config, majorRelease) {
           Object.assign({}, config, fileConfig),
           rev,
           majorRelease,
-        )),
+        ),
+      ),
   );
 
   redis.quit();

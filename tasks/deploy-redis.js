@@ -4,12 +4,7 @@ const os = require('os');
 const util = require('util');
 const gutil = require('gulp-util');
 
-const {
-  env,
-  getRevision,
-  getConfigFor,
-  getRedisClient,
-} = require('./utils');
+const { env, getRevision, getConfigFor, getRedisClient } = require('./utils');
 
 //
 // Deployment process tasks
