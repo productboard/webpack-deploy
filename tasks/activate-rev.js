@@ -74,7 +74,7 @@ function updateMainRev(client, config, rev, majorRelease, cb) {
 
 function activateVersion(rev, config, majorRelease) {
   var notifyEnabled = argv.notify;
-  getRedisClient(config, function(redis) {
+  getRedisClient(config, function(err, redis) {
     var quitRedis = function() {
       redis.quit();
     };

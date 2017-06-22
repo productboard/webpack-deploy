@@ -24,6 +24,7 @@
   "bin": {
     "deploy": "bin/deploy.sh",
     "activate-rev": "bin/activate-rev",
+    "current-rev": "bin/current-rev",
     "list-revs": "bin/list-revs",
     "slack-notify": "bin/slack-notify",
     "deploy-redis": "bin/deploy-redis",
@@ -54,6 +55,7 @@
     "gulp-webpack": "^1.5.0",
     "html-webpack-plugin": "^1.6.1",
     "object-assign": "^4.0.1",
+    "promise-redis": "^0.0.5",
     "promisify-node": "^0.4.0",
     "redis": "^0.12.1",
     "request": "^2.61.0",

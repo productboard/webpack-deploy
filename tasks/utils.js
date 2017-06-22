@@ -3,7 +3,7 @@ var fs = require('fs');
 var exec = require('child_process').exec;
 var gutil = require('gulp-util');
 
-var redis = require('redis');
+var redis = require('promise-redis')();
 var revision = require('git-rev');
 var fullname = require('fullname');
 var argv = require('yargs').string('rev').argv;
@@ -66,7 +66,7 @@ module.exports.getRedisClient = function(config, callback) {
     if (err) {
       gutil.log(gutil.colors.red('Error:'), err);
     }
-    callback(client);
+    callback(err, client);
   });
 };
 
