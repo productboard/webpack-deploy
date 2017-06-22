@@ -25,24 +25,38 @@ function uploadFile(config, file, rev) {
     if (config.revTimestampKey) {
       client.set(util.format(config.revTimestampKey, rev), timestamp);
     } else {
-      gutil.log(gutil.colors.red(
-        "Missing 'revTimestampKey' in config, unable to store rev timestamp."
-      ));
+      gutil.log(
+        gutil.colors.red(
+          "Missing 'revTimestampKey' in config, unable to store rev timestamp.",
+        ),
+      );
     }
 
     // Store autor and timestamp info under metaKey, e.g. 'meta:<rev-number>'
-    client.set(util.format(config.metaKey, rev), 'from ' + os.hostname() + ' on ' + timestamp);
+    client.set(
+      util.format(config.metaKey, rev),
+      'from ' + os.hostname() + ' on ' + timestamp,
+    );
     client.quit();
   });
 }
 
 function deployRedis(config, rev) {
-  gutil.log(gutil.colors.yellow(env()), 'Uploading revision', gutil.colors.green(rev));
+  gutil.log(
+    gutil.colors.yellow(env()),
+    'Uploading revision',
+    gutil.colors.green(rev),
+  );
 
   if (config.files) {
     for (var i = 0, l = config.files.length; i < l; ++i) {
       var fileName = config.files[i].indexPath;
-      gutil.log(gutil.colors.yellow(env()), 'Deploying', gutil.colors.magenta(fileName), '...');
+      gutil.log(
+        gutil.colors.yellow(env()),
+        'Deploying',
+        gutil.colors.magenta(fileName),
+        '...',
+      );
       var file = fs.readFileSync(fileName, 'utf8');
       uploadFile(Object.assign({}, config, config.files[i]), file, rev);
     }
@@ -53,7 +67,7 @@ function deployRedis(config, rev) {
 }
 
 function printCurrentRev() {
-  getRevision(function (rev) {
+  getRevision(function(err, rev) {
     gutil.log('Current revision', gutil.colors.green(rev));
   });
 }
@@ -63,13 +77,11 @@ function printCurrentRev() {
  */
 gulp.task('current-rev', [], printCurrentRev);
 
-
 /**
  * Promotes specified revision as current
  */
 gulp.task('deploy-redis', [], function() {
-  getRevision(function (rev) {
+  getRevision(function(err, rev) {
     deployRedis(getConfigFor('redis'), rev);
   });
 });
-

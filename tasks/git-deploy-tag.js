@@ -11,22 +11,34 @@ var getFullName = require('./utils').getFullName;
 
 function createGitTag(config, rev, callback) {
   var tag = env() + '-' + rev;
-  gutil.log(gutil.colors.yellow(env()), 'Creating deploy tag', gutil.colors.magenta(tag));
+  gutil.log(
+    gutil.colors.yellow(env()),
+    'Creating deploy tag',
+    gutil.colors.magenta(tag),
+  );
   var link = config.url + '/?rev=' + rev;
-  getFullName(function (name) {
-    createTag(tag, 'Deploy ' + rev + '\nBy ' + name + ' (' + os.hostname() + ')\n'+ link, function(err, res) {
-      if (err) {
-        gutil.log(gutil.colors.red("Error:"), err);
-        return callback();
-      }
-      gutil.log(gutil.colors.yellow(env()), 'Pushing deploy tag', gutil.colors.magenta(tag));
-      pushTag(tag, config.remote, function(err, res) {
+  getFullName(function(name) {
+    createTag(
+      tag,
+      'Deploy ' + rev + '\nBy ' + name + ' (' + os.hostname() + ')\n' + link,
+      function(err, res) {
         if (err) {
-          gutil.log(gutil.colors.red("Error:"), err);
+          gutil.log(gutil.colors.red('Error:'), err);
+          return callback();
         }
-        callback();
-      });
-    });
+        gutil.log(
+          gutil.colors.yellow(env()),
+          'Pushing deploy tag',
+          gutil.colors.magenta(tag),
+        );
+        pushTag(tag, config.remote, function(err, res) {
+          if (err) {
+            gutil.log(gutil.colors.red('Error:'), err);
+          }
+          callback();
+        });
+      },
+    );
   });
 }
 
@@ -34,8 +46,7 @@ function createGitTag(config, rev, callback) {
  * Promotes specified revision as current
  */
 gulp.task('git-deploy-tag', [], function(callback) {
-  getRevision(function (rev) {
+  getRevision(function(err, rev) {
     createGitTag(getConfigFor('git'), rev, callback);
   });
 });
-

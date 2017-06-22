@@ -12,7 +12,7 @@ var DEFAULT_ABBREV_LENGTH = 7;
 var CONFIG_FILENAME = 'deploy-config.js';
 var CONFIG_PATHS = [
   path.join(process.cwd(), CONFIG_FILENAME),
-  path.join(__dirname, '..', CONFIG_FILENAME)
+  path.join(__dirname, '..', CONFIG_FILENAME),
 ];
 var deployConfig = null;
 
@@ -41,24 +41,31 @@ module.exports.hash = function() {
 };
 
 module.exports.getRevision = function(cb) {
-  if (typeof argv.rev === 'string' && argv.rev !== 'current' && cb) cb(argv.rev);
-  else revision.long(function (rev) {
-    var abbrevLength = getConfigFor('git').abbrev || DEFAULT_ABBREV_LENGTH;
-    cb(rev.substr(0, abbrevLength));
-  });
+  if (typeof argv.rev === 'string' && argv.rev !== 'current' && cb)
+    cb(null, argv.rev);
+  else
+    revision.long(function(rev) {
+      var abbrevLength = getConfigFor('git').abbrev || DEFAULT_ABBREV_LENGTH;
+      cb(null, rev.substr(0, abbrevLength));
+    });
 };
 
-module.exports.getConfigFor = function(prop, silent) {
+function getConfigFor(prop, silent) {
   if (!deployConfig) {
     deployConfig = requireConfig(silent);
   }
-  return deployConfig[prop] && deployConfig[prop][env()] || deployConfig[prop];
-};
+  return (deployConfig[prop] && deployConfig[prop][env()]) ||
+    deployConfig[prop];
+}
+
+module.exports.getConfigFor = getConfigFor;
 
 module.exports.getRedisClient = function(config, callback) {
   var client = redis.createClient(config.port, config.host, config.options);
-  client.select(config.db, function(err){
-    if (err) { gutil.log(gutil.colors.red("Error:"), err); }
+  client.select(config.db, function(err) {
+    if (err) {
+      gutil.log(gutil.colors.red('Error:'), err);
+    }
     callback(client);
   });
 };
@@ -68,9 +75,9 @@ module.exports.getFullName = function(cb) {
 };
 
 module.exports.createTag = function(name, message, cb) {
-  exec('git tag -a "'+name+'" -m "' + message + '"', cb);
+  exec('git tag -a "' + name + '" -m "' + message + '"', cb);
 };
 
 module.exports.pushTag = function(name, remote, cb) {
-  exec('git push "'+remote+'" "'+name+'"', cb);
+  exec('git push "' + remote + '" "' + name + '"', cb);
 };

@@ -1,20 +1,17 @@
-var request = require('request');
-var fs = require('fs');
-var path = require('path');
-var glob = require('glob');
-var util = require('util');
-var gulp = require('gulp');
-var gutil = require('gulp-util');
+const promisify = require('promisify-node');
+const request = require('request-promise-native');
+const fs = promisify('fs');
+const path = require('path');
+const glob = require('glob');
+const util = require('util');
+const gulp = require('gulp');
+const gutil = require('gulp-util');
 
-var env = require('./utils').env;
-var hash = require('./utils').hash;
-var getRevision = require('./utils').getRevision;
-var getConfigFor = require('./utils').getConfigFor;
+const { env, hash, getRevision, getConfigFor } = require('./utils');
 
-
-function uploadSourceMap(config, rev, callback) {
-  var url = util.format(config.minifiedUrl, config.buildHash);
-  var sourceMap = fs.createReadStream(config.sourceMapPath);
+async function uploadSourceMap(config, rev, callback) {
+  const url = util.format(config.minifiedUrl, config.buildHash);
+  const sourceMap = fs.createReadStream(config.sourceMapPath);
 
   // curl https://api.rollbar.com/api/1/sourcemap \
   // -F access_token=aaaabbbbccccddddeeeeffff00001111 \
@@ -22,36 +19,42 @@ function uploadSourceMap(config, rev, callback) {
   // -F minified_url=http://example.com/static/js/example.min.js \
   // -F source_map=@static/js/example.min.map
   gutil.log(gutil.colors.yellow(env()), 'Uploading source map ...');
-  request.post({
-    url: 'https://api.rollbar.com/api/1/sourcemap',
-    formData: {
-      'access_token': config.accessToken,
-      'version': rev,
-      'minified_url': url,
-      'source_map': sourceMap,
+
+  try {
+    const response = await request.post(
+      {
+        url: 'https://api.rollbar.com/api/1/sourcemap',
+        formData: {
+          access_token: config.accessToken,
+          version: rev,
+          minified_url: url,
+          source_map: sourceMap,
+        },
+      },
+      callback,
+    );
+
+    let parsed;
+    try {
+      parsed = JSON.parse(response);
+    } catch (e) {
+      gutil.log(gutil.colors.red('Cannot parse reponse'));
     }
-  }, callback)
-  .on('response', function(data) {
-      data.on('data', function(all) {
-        var d;
-        try {
-          d = JSON.parse(all);
-        } catch(e) {}
-        if (data.statusCode === 200 && d && !d.err && d.result) {
-          gutil.log(gutil.colors.yellow(env()), 'Source map uploaded.');
-          gutil.log('File:', config.sourceMapPath);
-          gutil.log('URL:', url);
-          gutil.log(gutil.colors.green('rev:', rev));
-        } else {
-          gutil.log(gutil.colors.red('Non OK code returned'), d && d.result && d.result.msg);
-        }
-      });
-  });
+
+    if (parsed && !parsed.err && parsed.result) {
+      gutil.log(gutil.colors.yellow(env()), 'Source map uploaded.');
+      gutil.log('File:', config.sourceMapPath);
+      gutil.log('URL:', url);
+      gutil.log(gutil.colors.green('rev:', rev));
+    }
+  } catch (e) {
+    gutil.log(gutil.colors.red('Uploading failed'), e);
+  }
 }
 
 // Finds corresponding hashed source map file name
 function findByHash(mask, hash) {
-  var sourceMapFile = glob.sync(util.format(mask, hash));
+  const sourceMapFile = glob.sync(util.format(mask, hash));
   if (sourceMapFile && sourceMapFile.length > 0) {
     return sourceMapFile[0];
   }
@@ -67,111 +70,79 @@ function checkDuplicates(configs, sourceMapPath) {
   }
 }
 
-function uploadAppVersions(config, rev, callback) {
-  // Detect last build version hashes
-  var logMask = config.files ? './build.*.log' : 'build.log';
-  var buildLogFiles = glob.sync(logMask);
-
-  if (buildLogFiles < 1) {
-    gutil.log('ERROR: No build logs found')
-    return callback();
-  }
-
-  var hashes = [
-    // 'hashone', 'hashtwo', ...
-  ];
-  var reading = 0;
-  var uploading = 0;
-
-  var uploadDone = function() {
-    uploading--;
-    if (uploading === 0) {
-      callback();
+const resolveFile = (hashes, sourceMapPathMask) =>
+  hashes.map(buildHash => {
+    const sourceMapPath = findByHash(sourceMapPathMask, buildHash);
+    if (sourceMapPath) {
+      return {
+        buildHash,
+        sourceMapPath,
+      };
     }
-  };
+  });
 
-  var resolveFile = function(sourceMapPathMask) {
-    return hashes.map(function(hash) {
-      var sourceMapPath = findByHash(sourceMapPathMask, hash);
-      if (sourceMapPath) {
-        return {
-          buildHash: hash,
-          sourceMapPath,
-        };
-      }
-    });
-  };
-
-  var resolveConfig = function(config) {
-    if (config.files) {
-      return config.files.map(function(file) {
-        var found = resolveFile(file.sourceMapPath)
+const resolveConfig = (hashes, config) =>
+  (config.files || [config])
+    .map(fileConfig => {
+      const found = resolveFile(hashes, fileConfig.sourceMapPath)
         .filter(Boolean)
         // Merge in app version specific config
-        .map(function(conf) {
-          return Object.assign({}, file, conf);
-        });
+        .map(conf => Object.assign({}, fileConfig, conf));
 
-        return checkDuplicates(found, file.sourceMapPath);
-      }).filter(Boolean);
-    } else {
-      var found = resolveFile(config.sourceMapPath);
+      return checkDuplicates(found, fileConfig.sourceMapPath);
+    })
+    .filter(Boolean);
 
-      var final = checkDuplicates(found, config.sourceMapPath);
-      return [ final ].filter(Boolean);
-    }
-  };
+async function uploadAppVersions(config, rev) {
+  // Detect last build version hashes
+  const logMask = config.files ? './build.*.log' : 'build.log';
+  const buildLogFiles = glob.sync(logMask);
 
-  var readingDone = function() {
-    reading--;
-    if (reading === 0) {
-      // Upload source maps one by one
-      var resolvedSourceMapConfigs = resolveConfig(config);
+  if (buildLogFiles < 1) {
+    gutil.log('ERROR: No build logs found');
+    return;
+  }
 
-      if (buildLogFiles.length !== resolvedSourceMapConfigs.length) {
-        gutil.log('ERROR: Could not find source maps for all builds');
-      } else {
-        resolvedSourceMapConfigs.map(function(sourceMapConfig) {
-          uploading++;
-          uploadSourceMap(
-            Object.assign({}, config, sourceMapConfig),
-            rev, uploadDone
-          );
-        });
-      }
-    }
-  };
+  const hashes = [
+    // 'hashone', 'hashtwo', ...
+  ];
 
   // Read build logs and fill up array of hashes
-  buildLogFiles.map(function(file) {
-    reading++;
-
-    fs.open(file, 'r', function(err, fd) {
-      if (err) {
-        gutil.log('ERROR: Cannot read', file);
-        readingDone();
-        return;
-      }
-      var buff = new Buffer(64);
-      fs.read(fd, buff, 0, 64, 0, function(err, read) {
-        if (err) {
-          gutil.log('ERROR: Cannot read', file);
-          readingDone();
-          return;
-        }
-        var header = buff.toString('utf-8', 0, read);
-        var parsedHeader = header.match(/Hash:\s(\w+)/i);
+  await Promise.all(
+    buildLogFiles.map(async file => {
+      try {
+        const fd = await fs.openAsync(file, 'r');
+        // Read just the first 64 chars from the log file
+        const buff = new Buffer(64);
+        const read = await fs.readAsync(fd, buff, 0, 64, 0);
+        const header = buff.toString('utf-8', 0, read);
+        // Look for the webpack hash
+        const parsedHeader = header.match(/Hash:\s(\w+)/i);
         if (parsedHeader && parsedHeader[1]) {
           hashes.push(parsedHeader[1]);
         }
-        readingDone();
-      })
-    });
-  });
+      } catch (e) {
+        gutil.log('ERROR: Cannot read', file, e);
+      }
+    }),
+  );
+
+  const resolvedSourceMapConfigs = resolveConfig(hashes, config);
+
+  // Upload source maps one by one
+  if (buildLogFiles.length !== resolvedSourceMapConfigs.length) {
+    gutil.log('ERROR: Could not find source maps for all builds');
+  } else {
+    await Promise.all(
+      resolvedSourceMapConfigs.map(async sourceMapConfig =>
+        uploadSourceMap(Object.assign({}, config, sourceMapConfig), rev),
+      ),
+    );
+  }
 }
 
-gulp.task('rollbar-source-map', function(callback) {
-  getRevision(function (rev) {
-    uploadAppVersions(getConfigFor('rollbar'), rev, callback);
-  });
+gulp.task('rollbar-source-map', async () => {
+  const rev = await promisify(getRevision)();
+
+  await uploadAppVersions(getConfigFor('rollbar'), rev);
 });
