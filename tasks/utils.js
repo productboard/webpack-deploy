@@ -8,7 +8,41 @@ const gutil = require('gulp-util');
 const redis = require('promise-redis')();
 const revision = require('git-rev');
 const fullname = require('fullname');
-const argv = require('yargs').string('rev').argv;
+const argv = require('yargs')
+  .options({
+    rev: {
+      describe: 'Build revision',
+      demandOption: false,
+      type: 'string',
+    },
+    env: {
+      describe: 'Specify deploy environment',
+      demandOption: false,
+      type: 'string',
+    },
+    major: {
+      group: 'activate-rev',
+      alias: 'm',
+      describe: 'Flag revision as major',
+      demandOption: false,
+      type: 'boolean',
+    },
+    notify: {
+      group: 'activate-rev',
+      alias: 'n',
+      describe: 'Send a slack notification after activation',
+      demandOption: false,
+      type: 'boolean',
+    },
+    all: {
+      group: 'list-revs',
+      alias: 'a',
+      describe: 'List all revs above the default limit',
+      demandOption: false,
+      type: 'boolean',
+    },
+  })
+  .help().argv;
 
 const DEFAULT_ABBREV_LENGTH = 7;
 const CONFIG_FILENAME = 'deploy-config.js';
@@ -39,10 +73,6 @@ var env = function() {
 };
 
 module.exports.env = env;
-
-module.exports.hash = function() {
-  return argv.hash;
-};
 
 module.exports.getRevision = function(cb) {
   if (typeof argv.rev === 'string' && argv.rev !== 'current' && cb)
