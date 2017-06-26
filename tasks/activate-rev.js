@@ -1,4 +1,3 @@
-const { promisify } = require('bluebird');
 const gulp = require('gulp');
 const util = require('util');
 const gutil = require('gulp-util');
@@ -64,7 +63,7 @@ async function updateMainRev(client, config, rev, majorRelease) {
 
 async function activateVersion(rev, config, majorRelease) {
   const notifyEnabled = argv.notify;
-  const redis = await promisify(getRedisClient)(config);
+  const redis = await getRedisClient(config);
 
   await Promise.all(
     (config.files || [config])
@@ -95,7 +94,7 @@ gulp.task('activate-rev', async () => {
   if (argv.rev) {
     await activateVersion(argv.rev, getConfigFor('redis'), majorRelease);
   } else {
-    const rev = await promisify(getRevision)();
+    const rev = await getRevision();
     await activateVersion(rev, getConfigFor('redis'), majorRelease);
   }
 });

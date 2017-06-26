@@ -1,4 +1,3 @@
-const { promisify } = require('bluebird');
 const gulp = require('gulp');
 const os = require('os');
 const gutil = require('gulp-util');
@@ -19,7 +18,7 @@ async function createGitTag(config, rev) {
   }
   const tag = env() + '-' + rev;
   const link = config.url + '/?rev=' + rev;
-  const name = await promisify(getFullName)();
+  const name = await getFullName();
 
   gutil.log(
     gutil.colors.yellow(env()),
@@ -58,6 +57,6 @@ async function createGitTag(config, rev) {
  * Promotes specified revision as current
  */
 gulp.task('git-deploy-tag', async () => {
-  const rev = await promisify(getRevision)();
+  const rev = await getRevision();
   await createGitTag(getConfigFor('git'), rev);
 });

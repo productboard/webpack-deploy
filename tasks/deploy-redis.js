@@ -1,4 +1,3 @@
-const { promisify } = require('bluebird');
 const gulp = require('gulp');
 const fs = require('fs');
 const os = require('os');
@@ -17,7 +16,7 @@ const {
 //
 
 async function uploadFile(config, file, rev) {
-  const client = await promisify(getRedisClient)(config);
+  const client = await getRedisClient(config);
 
   const timestamp = new Date();
 
@@ -67,7 +66,7 @@ async function deployRedis(config, rev) {
 }
 
 async function printCurrentRev() {
-  const rev = await promisify(getRevision)();
+  const rev = await getRevision();
   gutil.log('Current revision', gutil.colors.green(rev));
 }
 
@@ -80,6 +79,6 @@ gulp.task('current-rev', printCurrentRev);
  * Promotes specified revision as current
  */
 gulp.task('deploy-redis', async () => {
-  const rev = await promisify(getRevision)();
+  const rev = await getRevision();
   await deployRedis(getConfigFor('redis'), rev);
 });

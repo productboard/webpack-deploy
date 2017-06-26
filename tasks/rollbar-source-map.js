@@ -1,4 +1,4 @@
-const { promisify, promisifyAll } = require('bluebird');
+const { promisifyAll } = require('bluebird');
 const request = require('request-promise-native');
 const fs = promisifyAll(require('fs'));
 const path = require('path');
@@ -142,7 +142,7 @@ async function uploadAppVersions(config, rev) {
 }
 
 gulp.task('rollbar-source-map', async () => {
-  const rev = await promisify(getRevision)();
+  const rev = await getRevision();
 
   await uploadAppVersions(getConfigFor('rollbar'), rev);
 });

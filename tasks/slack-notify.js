@@ -107,17 +107,21 @@ async function notifyRevDeployed(config, env) {
   if (env) {
     if (!config.notifyWebHook) {
       gutil.log(
-        gutil.colors.red('No slack.notifyWebHook option set in config'),
+        gutil.colors.red('No slack.notifyWebHook option set in config.'),
       );
       return;
     }
-    const name = await promisify(getFullName)();
-    const rev = await promisify(getRevision)();
+    const name = await getFullName();
+    const rev = await getRevision();
     const payload = messagePayload(config, env, rev, name);
     if (payload)
       await request.post({ url: config.notifyWebHook, json: payload });
   } else {
-    gutil.log(gutil.colors.red('No environment provided to Slack Notify'));
+    gutil.log(
+      gutil.colors.red(
+        'No environment provided to Slack Notify. Pass with --env',
+      ),
+    );
   }
 }
 
@@ -134,8 +138,8 @@ module.exports.notifyRevActivated = async function notifyRevActivated(
       );
       return;
     }
-    const name = await promisify(getFullName)();
-    const rev = await promisify(getRevision)();
+    const name = await getFullName();
+    const rev = await getRevision();
     const payload = activatedPayload(config, env, rev, name, majorRelease);
     if (payload)
       await request.post({ url: config.notifyWebHook, json: payload });

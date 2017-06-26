@@ -43,7 +43,7 @@
     "autoprefixer-core": "^5.2.1",
     "bluebird": "^3.5.0",
     "fullname": "^3.0.0",
-    "git-rev": "^0.2.1",
+    "git-rev-promises": "^1.0.8",
     "gitlog": "^2.0.1",
     "glob": "^6.0.4",
     "gulp": "^3.9.0",

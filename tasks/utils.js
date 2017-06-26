@@ -2,11 +2,11 @@ const { promisify } = require('bluebird');
 const util = require('util');
 const path = require('path');
 const fs = require('fs');
-const exec = require('child_process').exec;
+const exec = promisify(require('child_process').exec);
 const gutil = require('gulp-util');
 
 const redis = require('promise-redis')();
-const revision = require('git-rev');
+const revision = require('git-rev-promises');
 const fullname = require('fullname');
 const argv = require('yargs')
   .options({
@@ -53,9 +53,7 @@ const CONFIG_PATHS = [
 let deployConfig = null;
 
 function requireConfig(silent) {
-  var filename = CONFIG_PATHS.find(function(configPath) {
-    return fs.existsSync(configPath);
-  });
+  const filename = CONFIG_PATHS.find(configPath => fs.existsSync(configPath));
 
   if (filename) {
     !silent && gutil.log('Using config file ' + gutil.colors.magenta(filename));
@@ -68,20 +66,18 @@ function requireConfig(silent) {
 
 module.exports.argv = argv;
 
-var env = function() {
-  return argv.env || 'development';
-};
+const env = () => argv.env || 'development';
 
 module.exports.env = env;
 
-module.exports.getRevision = function(cb) {
-  if (typeof argv.rev === 'string' && argv.rev !== 'current' && cb)
-    cb(null, argv.rev);
-  else
-    revision.long(function(rev) {
-      var abbrevLength = getConfigFor('git').abbrev || DEFAULT_ABBREV_LENGTH;
-      cb(null, rev.substr(0, abbrevLength));
-    });
+module.exports.getRevision = async function() {
+  if (typeof argv.rev === 'string' && argv.rev !== 'current') return argv.rev;
+
+  const rev = await revision.long();
+  if (rev) {
+    const abbrevLength = getConfigFor('git').abbrev || DEFAULT_ABBREV_LENGTH;
+    return rev.substr(0, abbrevLength);
+  }
 };
 
 function getConfigFor(prop, silent) {
@@ -94,24 +90,22 @@ function getConfigFor(prop, silent) {
 
 module.exports.getConfigFor = getConfigFor;
 
-module.exports.getRedisClient = function(config, callback) {
-  var client = redis.createClient(config.port, config.host, config.options);
-  client.select(config.db, function(err) {
-    if (err) {
-      gutil.log(gutil.colors.red('Error:'), err);
-    }
-    callback(err, client);
-  });
+module.exports.getRedisClient = async function(config) {
+  try {
+    const client = redis.createClient(config.port, config.host, config.options);
+    await client.select(config.db);
+    return client;
+  } catch (e) {
+    gutil.log(gutil.colors.red('Error creating redis client:'), e);
+  }
 };
 
-module.exports.getFullName = function(cb) {
-  fullname().then(name => cb(null, name));
-};
+module.exports.getFullName = fullname;
 
 module.exports.createTag = async function(name, message) {
-  await promisify(exec)(`git tag -a "${name}" -m "${message}"`);
+  await exec(`git tag -a "${name}" -m "${message}"`);
 };
 
 module.exports.pushTag = async function(name, remote) {
-  await promisify(exec)(`git push "${remote}" "${name}"`);
+  await exec(`git push "${remote}" "${name}"`);
 };

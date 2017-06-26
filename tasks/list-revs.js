@@ -68,7 +68,7 @@ async function getRev(rev, currentRev, client, config) {
 }
 
 async function printVersionRevs(config) {
-  const client = await promisify(getRedisClient)(config);
+  const client = await getRedisClient(config);
 
   const currentRev = await client.get(config.mainRevKey);
   if (!currentRev) {
