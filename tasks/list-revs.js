@@ -1,161 +1,129 @@
 /*eslint no-console: 0 */
-var gulp = require('gulp');
-var util = require('util');
-var path = require('path');
-var gutil = require('gulp-util');
-var redis = require('redis');
-var gitlog = require('gitlog');
-var async = require('async');
+const { promisify } = require('bluebird');
+const gulp = require('gulp');
+const util = require('util');
+const path = require('path');
+const gutil = require('gulp-util');
+const redis = require('redis');
+const gitlog = promisify(require('gitlog'));
 
-var argv = require('./utils').argv;
-var env = require('./utils').env;
-var getConfigFor = require('./utils').getConfigFor;
-var getRedisClient = require('./utils').getRedisClient;
+const { argv, env, getConfigFor, getRedisClient } = require('./utils');
 
-var DEFAULT_MAX_COUNT = 10;
+const DEFAULT_MAX_COUNT = 10;
 
 //
 // Deployment process tasks
 //
 
-function printVersionRevs(config) {
-  getRedisClient(config, function(err, client) {
-    client.get(config.mainRevKey, function(err, currentRev) {
-      if (err) {
-        gutil.log(gutil.colors.red('Error:'), err);
-      }
-      // gutil.log(gutil.colors.yellow(env()), 'Current revision', data);
+async function getRev(rev, currentRev, client, config) {
+  var revHash = rev.substr(config.indexKey.indexOf('%s'));
+  if (revHash === 'current') return;
 
-      client.keys(
-        util.format(config.indexKey, '???????'),
-        function(err2, data) {
-          if (err2) {
-            gutil.log(gutil.colors.red('Error:'), err2);
-          }
-          gutil.log(
-            gutil.colors.yellow(env()),
-            'List of deployed revisions for ' + config.indexKey + ':',
-          );
-
-          var getRev = function(rev, callback) {
-            var revHash = rev.substr(config.indexKey.indexOf('%s'));
-            if (revHash === 'current') return callback();
-
-            gitlog(
-              {
-                repo: path.resolve(process.cwd(), '.git'),
-                number: 1,
-                fields: [
-                  'abbrevHash',
-                  'subject',
-                  'committerDate',
-                  'committerDateRel',
-                  'authorName',
-                  'hash',
-                ],
-                branch: revHash,
-              },
-              function(err3, commitData) {
-                var str = revHash === currentRev ? rev + ' (current)' : rev;
-                if (err3) {
-                  if (err3.indexOf('unknown revision') > 0) {
-                    return callback(null, [
-                      0,
-                      gutil.colors.yellow(str),
-                      gutil.colors.red('Unknown revision'),
-                    ]);
-                  }
-                  gutil.log(gutil.colors.yellow(str));
-                  gutil.log(gutil.colors.red('Error:'), err3);
-                  return callback(err3);
-                }
-
-                if (!commitData.length) {
-                  return callback();
-                }
-
-                commitData = commitData[0];
-
-                client.get(
-                  util.format(config.metaKey, revHash),
-                  function(err4, metadata) {
-                    if (err4) {
-                      gutil.log(gutil.colors.red('Error:'), err4);
-                      return callback(err4);
-                    }
-
-                    callback(null, [
-                      new Date(commitData.committerDate),
-                      gutil.colors.yellow(str),
-                      commitData.subject,
-                      gutil.colors.white(commitData.committerDateRel),
-                      gutil.colors.white.blue(
-                        '<' + commitData.authorName + '>',
-                      ),
-                      (metadata && gutil.colors.white.blue(metadata)) || '',
-                    ]);
-                  },
-                );
-              },
-            );
-          };
-
-          var arr = [];
-
-          data.map(function(rev) {
-            arr.push(function(cb) {
-              getRev(rev, cb);
-            });
-          });
-
-          console.log('\tTotal count:', arr.length);
-          if (!argv.all) {
-            console.log('\tShowing last', DEFAULT_MAX_COUNT);
-            console.log('\tRun with --all to show all');
-          }
-
-          async.parallel(arr, function(err, results) {
-            if (err) {
-              gutil.log('Error:', err);
-            } else {
-              results = results
-                .filter(function(el) {
-                  return el && el.length > 0;
-                })
-                .sort(function(a, b) {
-                  return a[0] - b[0];
-                });
-              if (!argv.all) {
-                results = results.slice(
-                  Math.max(arr.length - DEFAULT_MAX_COUNT, 1),
-                );
-              }
-              results.map(function(el) {
-                console.log.apply(console, el.splice(1));
-              });
-            }
-
-            client.quit();
-          });
-        },
-      );
+  var str = revHash === currentRev ? rev + ' (current)' : rev;
+  try {
+    const commitData = await gitlog({
+      repo: path.resolve(process.cwd(), '.git'),
+      number: 1,
+      fields: [
+        'abbrevHash',
+        'subject',
+        'committerDate',
+        'committerDateRel',
+        'authorName',
+        'hash',
+      ],
+      branch: revHash,
     });
-  });
+    if (!commitData.length) {
+      return;
+    }
+
+    const firstCommitData = commitData[0];
+
+    const metadata = await client.get(util.format(config.metaKey, revHash));
+    if (!metadata) {
+      gutil.log(gutil.colors.red('Error:'), err4);
+      return;
+    }
+
+    return [
+      new Date(firstCommitData.committerDate),
+      gutil.colors.yellow(str),
+      firstCommitData.subject,
+      gutil.colors.white(firstCommitData.committerDateRel),
+      gutil.colors.white.blue('<' + firstCommitData.authorName + '>'),
+      (metadata && gutil.colors.white.blue(metadata)) || '',
+    ];
+  } catch (e) {
+    if (e.toString().indexOf('unknown revision') > 0) {
+      return [
+        0,
+        gutil.colors.yellow(str),
+        gutil.colors.red('Unknown revision'),
+      ];
+    }
+    gutil.log(gutil.colors.yellow(str));
+    gutil.log(gutil.colors.red('Error:'), e);
+  }
 }
 
-function printRevs(config) {
-  if (config.files) {
-    for (var i = 0, l = config.files.length; i < l; ++i) {
-      printVersionRevs(Object.assign({}, config, config.files[i]));
-    }
-  } else {
-    printVersionRevs(config);
+async function printVersionRevs(config) {
+  const client = await promisify(getRedisClient)(config);
+
+  const currentRev = await client.get(config.mainRevKey);
+  if (!currentRev) {
+    gutil.log(gutil.colors.red('Could not find the current revision'));
+    return;
   }
+  // gutil.log(gutil.colors.yellow(env()), 'Current revision', data);
+
+  const data = await client.keys(util.format(config.indexKey, '???????'));
+  if (!data) {
+    gutil.log(gutil.colors.red('Could not retrieve revision list'));
+  }
+
+  try {
+    let results = await Promise.all(
+      data.map(rev => getRev(rev, currentRev, client, config)),
+    );
+
+    results = results
+      .filter(el => el && el.length > 0)
+      .sort((a, b) => a[0] - b[0]);
+
+    if (!argv.all && results.length > DEFAULT_MAX_COUNT) {
+      results = results.slice(Math.max(results.length - DEFAULT_MAX_COUNT, 1));
+    }
+
+    gutil.log(
+      gutil.colors.yellow(env()),
+      'List of deployed revisions for ' + config.indexKey + ':',
+    );
+
+    gutil.log('\tTotal count:', data.length);
+    if (!argv.all) {
+      gutil.log('\tShowing last', DEFAULT_MAX_COUNT);
+      gutil.log('\tRun with --all to show all');
+    }
+
+    // Send all to output, leaving out the date
+    results.forEach(el => gutil.log.apply(gutil, el.splice(1)));
+  } catch (e) {
+    gutil.log('Error:', e);
+  } finally {
+    client.quit();
+  }
+}
+
+async function printRevs(config) {
+  await Promise.all(
+    (config.files || [config])
+      .map(fileConfig =>
+        printVersionRevs(Object.assign({}, config, fileConfig))),
+  );
 }
 
 /**
  * Prints list of deployed revision numbers
  */
-gulp.task('list-revs', [], function() {
-  printRevs(getConfigFor('redis'));
-});
+gulp.task('list-revs', async () => await printRevs(getConfigFor('redis')));
