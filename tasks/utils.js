@@ -1,20 +1,22 @@
-var path = require('path');
-var fs = require('fs');
-var exec = require('child_process').exec;
-var gutil = require('gulp-util');
+const { promisify } = require('bluebird');
+const util = require('util');
+const path = require('path');
+const fs = require('fs');
+const exec = require('child_process').exec;
+const gutil = require('gulp-util');
 
-var redis = require('promise-redis')();
-var revision = require('git-rev');
-var fullname = require('fullname');
-var argv = require('yargs').string('rev').argv;
+const redis = require('promise-redis')();
+const revision = require('git-rev');
+const fullname = require('fullname');
+const argv = require('yargs').string('rev').argv;
 
-var DEFAULT_ABBREV_LENGTH = 7;
-var CONFIG_FILENAME = 'deploy-config.js';
-var CONFIG_PATHS = [
+const DEFAULT_ABBREV_LENGTH = 7;
+const CONFIG_FILENAME = 'deploy-config.js';
+const CONFIG_PATHS = [
   path.join(process.cwd(), CONFIG_FILENAME),
   path.join(__dirname, '..', CONFIG_FILENAME),
 ];
-var deployConfig = null;
+let deployConfig = null;
 
 function requireConfig(silent) {
   var filename = CONFIG_PATHS.find(function(configPath) {
@@ -71,13 +73,13 @@ module.exports.getRedisClient = function(config, callback) {
 };
 
 module.exports.getFullName = function(cb) {
-  fullname().then(cb);
+  fullname().then(name => cb(null, name));
 };
 
-module.exports.createTag = function(name, message, cb) {
-  exec('git tag -a "' + name + '" -m "' + message + '"', cb);
+module.exports.createTag = async function(name, message) {
+  await promisify(exec)(`git tag -a "${name}" -m "${message}"`);
 };
 
-module.exports.pushTag = function(name, remote, cb) {
-  exec('git push "' + remote + '" "' + name + '"', cb);
+module.exports.pushTag = async function(name, remote) {
+  await promisify(exec)(`git push "${remote}" "${name}"`);
 };

@@ -49,4 +49,4 @@ function deployS3(config) {
 /**
  * Deploy tasks
  */
-gulp.task('deploy-s3', [], () => deployS3(getConfigFor('s3')));
+gulp.task('deploy-s3', () => deployS3(getConfigFor('s3')));

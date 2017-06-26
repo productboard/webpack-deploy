@@ -113,7 +113,7 @@ function notifyRevDeployed(config, env) {
   env = env || argv.env;
   if (env) {
     getRevision(function(err, rev) {
-      getFullName(function(name) {
+      getFullName(function(err, name) {
         var payload = messagePayload(config, env, rev, name);
         request.post(config.notifyWebHook).send(payload).end();
       });
@@ -131,7 +131,7 @@ module.exports.notifyRevActivated = function notifyRevActivated(
   env = env || argv.env;
   if (env) {
     getRevision(function(err, rev) {
-      getFullName(function(name) {
+      getFullName(function(err, name) {
         var payload = activatedPayload(config, env, rev, name, majorRelease);
         if (config.notifyWebHook) {
           request.post(config.notifyWebHook).send(payload).end();

@@ -1,4 +1,4 @@
-const promisify = require('promisify-node');
+const { promisify } = require('bluebird');
 const gulp = require('gulp');
 const fs = require('fs');
 const os = require('os');

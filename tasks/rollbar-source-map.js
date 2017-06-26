@@ -1,6 +1,6 @@
-const promisify = require('promisify-node');
+const { promisify, promisifyAll } = require('bluebird');
 const request = require('request-promise-native');
-const fs = promisify('fs');
+const fs = promisifyAll(require('fs'));
 const path = require('path');
 const glob = require('glob');
 const util = require('util');
