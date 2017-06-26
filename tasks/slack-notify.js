@@ -1,26 +1,21 @@
-var gulp = require('gulp');
-var os = require('os');
-var gutil = require('gulp-util');
-var request = require('superagent');
-var argv = require('yargs').string('rev').argv;
+const { promisify } = require('bluebird');
+const gulp = require('gulp');
+const os = require('os');
+const gutil = require('gulp-util');
+const request = require('request-promise-native');
 
-var getRevision = require('./utils').getRevision;
-var getConfigFor = require('./utils').getConfigFor;
-var getFullName = require('./utils').getFullName;
+const { argv, getRevision, getConfigFor, getFullName } = require('./utils');
 
 function messagePayload(config, env, rev, fullname) {
-  var hostname = os.hostname();
-  var fallback = 'New frontend revision ' +
-    rev +
-    ' was deployed on ' +
-    env +
-    ' by ' +
-    fullname +
-    ' from ' +
-    hostname +
-    '.';
-  var text = 'New frontend revision deployed!';
-  var link = config.url + '/?rev=' + rev;
+  if (!config.url) {
+    gutil.log(gutil.colors.red('No slack.url option set in config'));
+    return;
+  }
+  const hostname = os.hostname();
+  const fallback = `New frontend revision ${rev} was deployed on ${env}` +
+    ` by ${fullname} from ${hostname}.`;
+  const text = 'New frontend revision deployed!';
+  const link = config.url + '/?rev=' + rev;
 
   return {
     channel: config.channel || '#hacking',
@@ -28,7 +23,7 @@ function messagePayload(config, env, rev, fullname) {
     icon_emoji: config.botIconEmoji || ':rocket:',
     attachments: [
       {
-        fallback: fallback,
+        fallback,
         pretext: text,
         color: config.messageColor || '#7CD197',
         fields: [
@@ -59,27 +54,25 @@ function messagePayload(config, env, rev, fullname) {
 }
 
 function activatedPayload(config, env, rev, fullname, majorRelease) {
-  var hostname = os.hostname();
-  var fallback = 'Frontend revision ' +
-    rev +
-    ' was activated on ' +
-    env +
-    ' by ' +
-    fullname +
-    ' from ' +
-    hostname +
-    '.';
-  var text = 'Frontend revision activated' +
+  if (!config.url) {
+    gutil.log(gutil.colors.red('No slack.url option set in config'));
+    return;
+  }
+  const hostname = os.hostname();
+  const fallback = `Frontend revision ${rev} was activated on ${env}` +
+    ` by ${fullname} from ${hostname}.`;
+  const text = 'Frontend revision activated' +
     (majorRelease ? ' as major release' : '') +
     '!';
-  var link = config.url;
+  const link = config.url;
+
   return {
     channel: config.channel || '#hacking',
     username: config.botName || 'Deploy Bot',
     icon_emoji: config.botIconEmoji || ':rocket:',
     attachments: [
       {
-        fallback: fallback,
+        fallback,
         pretext: text,
         color: config.messageColor || '#7CD197',
         fields: [
@@ -109,35 +102,43 @@ function activatedPayload(config, env, rev, fullname, majorRelease) {
   };
 }
 
-function notifyRevDeployed(config, env) {
+async function notifyRevDeployed(config, env) {
   env = env || argv.env;
   if (env) {
-    getRevision(function(err, rev) {
-      getFullName(function(err, name) {
-        var payload = messagePayload(config, env, rev, name);
-        request.post(config.notifyWebHook).send(payload).end();
-      });
-    });
+    if (!config.notifyWebHook) {
+      gutil.log(
+        gutil.colors.red('No slack.notifyWebHook option set in config'),
+      );
+      return;
+    }
+    const name = await promisify(getFullName)();
+    const rev = await promisify(getRevision)();
+    const payload = messagePayload(config, env, rev, name);
+    if (payload)
+      await request.post({ url: config.notifyWebHook, json: payload });
   } else {
     gutil.log(gutil.colors.red('No environment provided to Slack Notify'));
   }
 }
 
-module.exports.notifyRevActivated = function notifyRevActivated(
+module.exports.notifyRevActivated = async function notifyRevActivated(
   config,
   env,
   majorRelease,
 ) {
   env = env || argv.env;
   if (env) {
-    getRevision(function(err, rev) {
-      getFullName(function(err, name) {
-        var payload = activatedPayload(config, env, rev, name, majorRelease);
-        if (config.notifyWebHook) {
-          request.post(config.notifyWebHook).send(payload).end();
-        }
-      });
-    });
+    if (!config.notifyWebHook) {
+      gutil.log(
+        gutil.colors.red('No slack.notifyWebHook option set in config'),
+      );
+      return;
+    }
+    const name = await promisify(getFullName)();
+    const rev = await promisify(getRevision)();
+    const payload = activatedPayload(config, env, rev, name, majorRelease);
+    if (payload)
+      await request.post({ url: config.notifyWebHook, json: payload });
   } else {
     gutil.log(gutil.colors.red('No environment provided to Slack Notify'));
   }
@@ -146,10 +147,10 @@ module.exports.notifyRevActivated = function notifyRevActivated(
 /**
  * Prints current revision number used as a redis key
  */
-gulp.task('slack-notify', [], function() {
-  notifyRevDeployed(getConfigFor('slack'));
+gulp.task('slack-notify', async () => {
+  await notifyRevDeployed(getConfigFor('slack'));
 });
 
-gulp.task('slack-notify-active', [], function() {
-  notifyRevActivated(getConfigFor('slack'));
+gulp.task('slack-notify-active', async () => {
+  await notifyRevActivated(getConfigFor('slack'));
 });

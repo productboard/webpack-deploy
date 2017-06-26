@@ -32,6 +32,8 @@ function requireConfig(silent) {
   process.exit(1);
 }
 
+module.exports.argv = argv;
+
 var env = function() {
   return argv.env || 'development';
 };

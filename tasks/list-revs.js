@@ -7,8 +7,7 @@ var redis = require('redis');
 var gitlog = require('gitlog');
 var async = require('async');
 
-var argv = require('yargs').string('rev').argv;
-
+var argv = require('./utils').argv;
 var env = require('./utils').env;
 var getConfigFor = require('./utils').getConfigFor;
 var getRedisClient = require('./utils').getRedisClient;
