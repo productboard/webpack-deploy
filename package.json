@@ -36,7 +36,8 @@
     "build": "./node_modules/.bin/gulp clean && ./node_modules/.bin/gulp webpack",
     "s3": "./node_modules/.bin/gulp deploy-s3 && ./node_modules/.bin/gulp rollbar-source-map --hash=`ls dist/assets/main-*.js 2>/dev/null | cut -f3 -d'/' | cut -f2 -d'-' | cut -f1 -d'.'`",
     "redis": "./node_modules/.bin/gulp deploy-redis && ./node_modules/.bin/gulp activate-rev",
-    "deploy": "npm run s3 & npm run redis & wait"
+    "deploy": "npm run s3 & npm run redis & wait",
+    "lint": "./node_modules/.bin/eslint --config .eslintrc.json tasks"
   },
   "dependencies": {
     "async": "^1.4.2",
@@ -45,7 +46,7 @@
     "fullname": "^3.0.0",
     "git-rev-promises": "^1.0.8",
     "gitlog": "^2.0.1",
-    "glob": "^6.0.4",
+    "glob": "^7.1.2",
     "gulp": "^3.9.0",
     "gulp-awspublish": "^2.0.2",
     "gulp-clean": "^0.3.1",
@@ -66,6 +67,10 @@
     "yargs": "^8.0.2"
   },
   "devDependencies": {
+    "babel-eslint": "^7.2.3",
+    "eslint": "^3.19.0",
+    "eslint-config-airbnb-base": "^11.2.0",
+    "eslint-plugin-import": "^2.6.0",
     "prettier": "^1.4.4"
   }
 }

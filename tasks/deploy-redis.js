@@ -60,7 +60,7 @@ async function deployRedis(config, rev) {
         '...',
       );
       const file = fs.readFileSync(fileName, 'utf8');
-      return await uploadFile(Object.assign({}, config, fileConfig), file, rev);
+      return uploadFile(Object.assign({}, config, fileConfig), file, rev);
     }),
   );
 }

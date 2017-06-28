@@ -1,13 +1,12 @@
 const { promisifyAll } = require('bluebird');
 const request = require('request-promise-native');
 const fs = promisifyAll(require('fs'));
-const path = require('path');
 const glob = require('glob');
 const util = require('util');
 const gulp = require('gulp');
 const gutil = require('gulp-util');
 
-const { env, hash, getRevision, getConfigFor } = require('./utils');
+const { env, getRevision, getConfigFor } = require('./utils');
 
 async function uploadSourceMap(config, rev, callback) {
   const url = util.format(config.minifiedUrl, config.buildHash);

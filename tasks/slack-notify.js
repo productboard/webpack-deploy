@@ -1,4 +1,3 @@
-const { promisify } = require('bluebird');
 const gulp = require('gulp');
 const os = require('os');
 const gutil = require('gulp-util');
@@ -125,11 +124,7 @@ async function notifyRevDeployed(config, env) {
   }
 }
 
-module.exports.notifyRevActivated = async function notifyRevActivated(
-  config,
-  env,
-  majorRelease,
-) {
+async function notifyRevActivated(config, env, majorRelease) {
   env = env || argv.env;
   if (env) {
     if (!config.notifyWebHook) {
@@ -146,15 +141,14 @@ module.exports.notifyRevActivated = async function notifyRevActivated(
   } else {
     gutil.log(gutil.colors.red('No environment provided to Slack Notify'));
   }
-};
+}
+
+module.exports.notifyRevActivated = notifyRevActivated;
 
 /**
  * Prints current revision number used as a redis key
  */
-gulp.task('slack-notify', async () => {
-  await notifyRevDeployed(getConfigFor('slack'));
-});
+gulp.task('slack-notify', async () => notifyRevDeployed(getConfigFor('slack')));
 
-gulp.task('slack-notify-active', async () => {
-  await notifyRevActivated(getConfigFor('slack'));
-});
+gulp.task('slack-notify-active', async () =>
+  notifyRevActivated(getConfigFor('slack')));

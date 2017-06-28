@@ -4,7 +4,6 @@ const gulp = require('gulp');
 const util = require('util');
 const path = require('path');
 const gutil = require('gulp-util');
-const redis = require('redis');
 const gitlog = promisify(require('gitlog'));
 
 const { argv, env, getConfigFor, getRedisClient } = require('./utils');
@@ -42,7 +41,7 @@ async function getRev(rev, currentRev, client, config) {
 
     const metadata = await client.get(util.format(config.metaKey, revHash));
     if (!metadata) {
-      gutil.log(gutil.colors.red('Error:'), err4);
+      gutil.log(gutil.colors.red('Cannot retrieve metadata'));
       return;
     }
 
@@ -126,4 +125,4 @@ async function printRevs(config) {
 /**
  * Prints list of deployed revision numbers
  */
-gulp.task('list-revs', async () => await printRevs(getConfigFor('redis')));
+gulp.task('list-revs', async () => printRevs(getConfigFor('redis')));

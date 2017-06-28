@@ -1,5 +1,4 @@
 const { promisify } = require('bluebird');
-const util = require('util');
 const path = require('path');
 const fs = require('fs');
 const exec = promisify(require('child_process').exec);
