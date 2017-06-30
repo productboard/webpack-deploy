@@ -24,6 +24,7 @@
   "bin": {
     "deploy": "bin/deploy.sh",
     "activate-rev": "bin/activate-rev",
+    "activate-branch": "bin/activate-branch",
     "current-rev": "bin/current-rev",
     "list-revs": "bin/list-revs",
     "slack-notify": "bin/slack-notify",
