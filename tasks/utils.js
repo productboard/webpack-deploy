@@ -5,7 +5,6 @@ const exec = promisify(require('child_process').exec);
 const gutil = require('gulp-util');
 
 const redis = require('promise-redis')();
-const git = require('git-rev-promises');
 const fullname = require('fullname');
 const argv = require('yargs')
   .options({
@@ -13,6 +12,16 @@ const argv = require('yargs')
       describe: 'Build revision',
       demandOption: false,
       type: 'string',
+    },
+    branch: {
+      describe: 'Deploy branch',
+      demandOption: false,
+      type: 'string',
+    },
+    confirm: {
+      describe: 'Skip confirmation propmpts',
+      demandOption: false,
+      type: 'boolean',
     },
     env: {
       describe: 'Specify deploy environment',
@@ -69,10 +78,18 @@ const env = () => argv.env || 'development';
 
 module.exports.env = env;
 
+async function git(subcommand) {
+  return (await exec('git ' + subcommand, {
+    cwd: process.cwd(),
+  }))
+    .split('\n')
+    .join('');
+}
+
 module.exports.getRevision = async function() {
   if (typeof argv.rev === 'string' && argv.rev !== 'current') return argv.rev;
 
-  const rev = await git.long();
+  const rev = await git('rev-parse HEAD');
   if (rev) {
     const abbrevLength = getConfigFor('git').abbrev || DEFAULT_ABBREV_LENGTH;
     return rev.substr(0, abbrevLength);
@@ -81,7 +98,8 @@ module.exports.getRevision = async function() {
 
 module.exports.getBranch = async function() {
   if (typeof argv.branch === 'string') return argv.branch;
-  const branch = await git.branch();
+
+  const branch = await git('rev-parse --abbrev-ref HEAD');
   return branch === 'HEAD' ? null : branch;
 };
 

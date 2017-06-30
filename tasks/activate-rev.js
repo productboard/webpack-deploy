@@ -1,18 +1,20 @@
 const gulp = require('gulp');
 const util = require('util');
 const gutil = require('gulp-util');
+const inquirer = require('inquirer');
 
 const {
   argv,
   env,
   getRevision,
+  getBranch,
   getConfigFor,
   getRedisClient,
 } = require('./utils');
 
 const { notifyRevActivated } = require('./slack-notify');
 
-async function updateMainRev(client, config, rev, majorRelease) {
+async function updateMainRev(client, config, { rev, branch, majorRelease }) {
   const file = await client.get(util.format(config.indexKey, rev));
   if (!file) {
     gutil.log(
@@ -25,11 +27,34 @@ async function updateMainRev(client, config, rev, majorRelease) {
     gutil.colors.yellow(env()),
     'Activating rev',
     gutil.colors.green(rev),
-    'for',
-    config.indexKey,
+    'for branch',
+    gutil.colors.cyan(branch),
   );
-  client.set(config.mainIndexKey, file);
-  await client.set(config.mainRevKey, rev);
+
+  // Save to branch specific <branchKey> and <branchRevKey>
+  client.set(util.format(config.branchKey, branch), file);
+  await client.set(util.format(config.branchRevKey, branch), rev);
+
+  const activeBranch = await client.get(config.mainBranchKey);
+
+  if (activeBranch === branch) {
+    gutil.log(
+      gutil.colors.yellow(env()),
+      'Activating rev',
+      gutil.colors.green(rev),
+      'for',
+      gutil.colors.cyan(config.indexKey),
+    );
+    // Save to <mainIndexKey> and <mainRevKey> when updating activated branch
+    client.set(config.mainIndexKey, file);
+    await client.set(config.mainRevKey, rev);
+    gutil.log(
+      gutil.colors.yellow(env()),
+      'Activated branch',
+      gutil.colors.cyan(branch),
+      'updated!',
+    );
+  }
 
   // If the rev is marked as a major release, update the timestamp in Redis
   // under <lastMajorTimestampKey>
@@ -52,32 +77,35 @@ async function updateMainRev(client, config, rev, majorRelease) {
     } else {
       gutil.log(
         gutil.colors.yellow(env()),
-        'Setting major timestamp for ',
+        'Setting major timestamp',
+        gutil.colors.cyan(timestamp),
+        'for',
         config.indexKey,
-        gutil.colors.green(timestamp),
       );
-      await client.set(config.lastMajorTimestampKey, timestamp);
+      const key = config.lastMajorTimestampKey.includes('%s')
+        ? util.format(config.lastMajorTimestampKey, branch)
+        : config.lastMajorTimestampKey;
+      await client.set(key, timestamp);
     }
   }
 }
 
-async function activateVersion(rev, config, majorRelease) {
+async function activateVersion(config, { rev, branch, majorRelease }) {
   const notifyEnabled = argv.notify;
   const redis = await getRedisClient(config);
+  const redisFiles = config.files || [config];
 
   await Promise.all(
-    (config.files || [config])
-      .map(fileConfig =>
-        updateMainRev(
-          redis,
-          Object.assign({}, config, fileConfig),
-          rev,
-          majorRelease,
-        ),
-      ),
+    redisFiles.map(fileConfig =>
+      updateMainRev(redis, Object.assign({}, config, fileConfig), {
+        rev,
+        branch,
+        majorRelease,
+      }),
+    ),
   );
 
-  redis.quit();
+  await redis.quit();
 
   if (notifyEnabled) {
     notifyRevActivated(getConfigFor('slack'), env(), majorRelease);
@@ -90,12 +118,28 @@ async function activateVersion(rev, config, majorRelease) {
  * Use with '-m' or '--major' to set lastMajorTimestamp key
  */
 gulp.task('activate-rev', async () => {
-  const majorRelease = argv.major || argv.m;
+  const majorRelease = argv.major;
+  const rev = await getRevision();
+  const branch = await getBranch();
 
-  if (argv.rev) {
-    await activateVersion(argv.rev, getConfigFor('redis'), majorRelease);
-  } else {
-    const rev = await getRevision();
-    await activateVersion(rev, getConfigFor('redis'), majorRelease);
+  if (!argv.branch && !argv.confirm) {
+    const answer = await inquirer.prompt({
+      name: 'branch',
+      type: 'confirm',
+      message: `Auto-detected branch "${branch}". OK?`,
+    });
+
+    if (!answer.branch) {
+      gutil.log('Canceling.');
+      return;
+    }
+  } else if (!argv.branch) {
+    gutil.log(
+      gutil.colors.yellow(env()),
+      'Auto-detected branch',
+      gutil.colors.cyan(branch),
+    );
   }
+
+  await activateVersion(getConfigFor('redis'), { rev, branch, majorRelease });
 });

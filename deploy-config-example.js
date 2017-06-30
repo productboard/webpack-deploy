@@ -16,15 +16,15 @@ var config = {
       db: 1,
       options: {},
       indexPath: 'dist/index.html',
-      indexKey: 'app:%s',
-      branchKey: 'app:branch:%s',
-      branchRevKey: 'app:branch-revision:%s',
-      metaKey: 'meta:%s',
+      indexKey: 'app:%s', // revision
+      branchKey: 'app:branch:%s', // branch name
+      branchRevKey: 'app:branch-revision:%s', // branch name
+      metaKey: 'meta:%s', // revision
       mainBranchKey: 'app:current-branch',
       mainIndexKey: 'app:current',
       mainRevKey: 'app:current-revision',
-      revTimestampKey: 'app-timestamp:%s',
-      lastMajorTimestampKey: 'app:last-major-timestamp',
+      revTimestampKey: 'app-timestamp:%s', // revision
+      lastMajorTimestampKey: 'app:admin:last-major-timestamp:%s', // branch name
     },
     staging: {
       port: 9999,
