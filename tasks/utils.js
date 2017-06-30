@@ -5,7 +5,7 @@ const exec = promisify(require('child_process').exec);
 const gutil = require('gulp-util');
 
 const redis = require('promise-redis')();
-const revision = require('git-rev-promises');
+const git = require('git-rev-promises');
 const fullname = require('fullname');
 const argv = require('yargs')
   .options({
@@ -72,11 +72,17 @@ module.exports.env = env;
 module.exports.getRevision = async function() {
   if (typeof argv.rev === 'string' && argv.rev !== 'current') return argv.rev;
 
-  const rev = await revision.long();
+  const rev = await git.long();
   if (rev) {
     const abbrevLength = getConfigFor('git').abbrev || DEFAULT_ABBREV_LENGTH;
     return rev.substr(0, abbrevLength);
   }
+};
+
+module.exports.getBranch = async function() {
+  if (typeof argv.branch === 'string') return argv.branch;
+  const branch = await git.branch();
+  return branch === 'HEAD' ? null : branch;
 };
 
 function getConfigFor(prop, silent) {
