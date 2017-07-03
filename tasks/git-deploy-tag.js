@@ -1,41 +1,62 @@
-var gulp = require('gulp');
-var os = require('os');
-var gutil = require('gulp-util');
+const gulp = require('gulp');
+const os = require('os');
+const gutil = require('gulp-util');
 
-var env = require('./utils').env;
-var getRevision = require('./utils').getRevision;
-var getConfigFor = require('./utils').getConfigFor;
-var createTag = require('./utils').createTag;
-var pushTag = require('./utils').pushTag;
-var getFullName = require('./utils').getFullName;
+const {
+  env,
+  getRevision,
+  getConfigFor,
+  createTag,
+  pushTag,
+  getFullName,
+} = require('./utils');
 
-function createGitTag(config, rev, callback) {
-  var tag = env() + '-' + rev;
-  gutil.log(gutil.colors.yellow(env()), 'Creating deploy tag', gutil.colors.magenta(tag));
-  var link = config.url + '/?rev=' + rev;
-  getFullName(function (name) {
-    createTag(tag, 'Deploy ' + rev + '\nBy ' + name + ' (' + os.hostname() + ')\n'+ link, function(err, res) {
-      if (err) {
-        gutil.log(gutil.colors.red("Error:"), err);
-        return callback();
-      }
-      gutil.log(gutil.colors.yellow(env()), 'Pushing deploy tag', gutil.colors.magenta(tag));
-      pushTag(tag, config.remote, function(err, res) {
-        if (err) {
-          gutil.log(gutil.colors.red("Error:"), err);
-        }
-        callback();
-      });
-    });
-  });
+async function createGitTag(config, rev) {
+  if (!config.url) {
+    gutil.log(gutil.colors.red('No git.url option set in config'));
+    return;
+  }
+  const tag = env() + '-' + rev;
+  const link = config.url + '/?rev=' + rev;
+  const name = await getFullName();
+
+  gutil.log(
+    gutil.colors.yellow(env()),
+    'Creating deploy tag',
+    gutil.colors.magenta(tag),
+  );
+
+  try {
+    await createTag(
+      tag,
+      'Deploy ' + rev + '\nBy ' + name + ' (' + os.hostname() + ')\n' + link,
+    );
+  } catch (e) {
+    gutil.log(gutil.colors.red('Error creating tag'), e);
+    return;
+  }
+
+  if (!config.remote) {
+    gutil.log(gutil.colors.red('No git.remote option set in config'));
+    return;
+  }
+
+  gutil.log(
+    gutil.colors.yellow(env()),
+    'Pushing deploy tag',
+    gutil.colors.magenta(tag),
+  );
+  try {
+    await pushTag(tag, config.remote);
+  } catch (e) {
+    gutil.log(gutil.colors.red('Error pushing tag'), e);
+  }
 }
 
 /**
  * Promotes specified revision as current
  */
-gulp.task('git-deploy-tag', [], function(callback) {
-  getRevision(function (rev) {
-    createGitTag(getConfigFor('git'), rev, callback);
-  });
+gulp.task('git-deploy-tag', async () => {
+  const rev = await getRevision();
+  await createGitTag(getConfigFor('git'), rev);
 });
-

@@ -1,75 +1,84 @@
-var gulp = require('gulp');
-var fs = require('fs');
-var os = require('os');
-var util = require('util');
-var gutil = require('gulp-util');
+const gulp = require('gulp');
+const fs = require('fs');
+const os = require('os');
+const util = require('util');
+const gutil = require('gulp-util');
 
-var env = require('./utils').env;
-var getRevision = require('./utils').getRevision;
-var getConfigFor = require('./utils').getConfigFor;
-var getRedisClient = require('./utils').getRedisClient;
+const {
+  env,
+  getRevision,
+  getConfigFor,
+  getRedisClient,
+} = require('./utils');
 
 //
 // Deployment process tasks
 //
 
-function uploadFile(config, file, rev) {
-  getRedisClient(config, function(client) {
-    var timestamp = new Date();
+async function uploadFile(config, file, rev) {
+  const client = await getRedisClient(config);
 
-    // Store index file under indexKey, e.g. 'app:<rev-number>'
-    client.set(util.format(config.indexKey, rev), file);
+  const timestamp = new Date();
 
-    // Store timestamp information under 'app-timestamp:<rev-number>'
-    // so we can compare if we have newer version than latest major rev
-    if (config.revTimestampKey) {
-      client.set(util.format(config.revTimestampKey, rev), timestamp);
-    } else {
-      gutil.log(gutil.colors.red(
-        "Missing 'revTimestampKey' in config, unable to store rev timestamp."
-      ));
-    }
+  // Store index file under indexKey, e.g. 'app:<rev-number>'
+  await client.set(util.format(config.indexKey, rev), file);
 
-    // Store autor and timestamp info under metaKey, e.g. 'meta:<rev-number>'
-    client.set(util.format(config.metaKey, rev), 'from ' + os.hostname() + ' on ' + timestamp);
-    client.quit();
-  });
-}
-
-function deployRedis(config, rev) {
-  gutil.log(gutil.colors.yellow(env()), 'Uploading revision', gutil.colors.green(rev));
-
-  if (config.files) {
-    for (var i = 0, l = config.files.length; i < l; ++i) {
-      var fileName = config.files[i].indexPath;
-      gutil.log(gutil.colors.yellow(env()), 'Deploying', gutil.colors.magenta(fileName), '...');
-      var file = fs.readFileSync(fileName, 'utf8');
-      uploadFile(Object.assign({}, config, config.files[i]), file, rev);
-    }
+  // Store timestamp information under 'app-timestamp:<rev-number>'
+  // so we can compare if we have newer version than latest major rev
+  if (config.revTimestampKey) {
+    await client.set(util.format(config.revTimestampKey, rev), timestamp);
   } else {
-    var file = fs.readFileSync(config.indexPath, 'utf8');
-    uploadFile(config, file, rev);
+    gutil.log(
+      gutil.colors.red(
+        "Missing 'revTimestampKey' in config, unable to store rev timestamp.",
+      ),
+    );
   }
+
+  // Store autor and timestamp info under metaKey, e.g. 'meta:<rev-number>'
+  await client.set(
+    util.format(config.metaKey, rev),
+    'from ' + os.hostname() + ' on ' + timestamp,
+  );
+  await client.quit();
 }
 
-function printCurrentRev() {
-  getRevision(function (rev) {
-    gutil.log('Current revision', gutil.colors.green(rev));
-  });
+async function deployRedis(config, rev) {
+  gutil.log(
+    gutil.colors.yellow(env()),
+    'Uploading revision',
+    gutil.colors.green(rev),
+  );
+
+  await Promise.all(
+    (config.files || [config]).map(async fileConfig => {
+      const fileName = fileConfig.indexPath;
+      gutil.log(
+        gutil.colors.yellow(env()),
+        'Deploying',
+        gutil.colors.magenta(fileName),
+        '...',
+      );
+      const file = fs.readFileSync(fileName, 'utf8');
+      return uploadFile(Object.assign({}, config, fileConfig), file, rev);
+    }),
+  );
+}
+
+async function printCurrentRev() {
+  const rev = await getRevision();
+  gutil.log('Current revision', gutil.colors.green(rev));
 }
 
 /**
  * Prints current revision number used as a redis key
  */
-gulp.task('current-rev', [], printCurrentRev);
-
+gulp.task('current-rev', printCurrentRev);
 
 /**
  * Promotes specified revision as current
  */
-gulp.task('deploy-redis', [], function() {
-  getRevision(function (rev) {
-    deployRedis(getConfigFor('redis'), rev);
-  });
+gulp.task('deploy-redis', async () => {
+  const rev = await getRevision();
+  await deployRedis(getConfigFor('redis'), rev);
 });
-
