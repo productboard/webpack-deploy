@@ -2,13 +2,19 @@
 # dont execute next commands on error
 trap 'exit' ERR
 
+# colors
+RED='\033[0;31m'
+YELLOW='\033[0;33m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
+
 # let echo interpret escape chars (\n)
 shopt -s xpg_echo
 
 GULP="`npm bin`/gulp"
 
 if [[ ! -x "$GULP" ]]; then
-  echo "ERROR: gulp executable not found"
+  echo "${RED}ERROR: gulp executable not found$NC"
   echo "Check path for valid executable: $GULP"
   exit 1
 fi
@@ -33,7 +39,7 @@ set_dirname
 # ENV is the first parameter, defaults to "staging"
 ENV=${1-development}
 
-echo "Environment: $ENV"
+echo "Environment: ${YELLOW}$ENV$NC"
 
 case "$ENV" in
   production)
@@ -62,17 +68,17 @@ BRANCH=`git rev-parse --abbrev-ref HEAD`
 REV="$COMMIT"
 BUILD_COUNT=`ls -a build*log 2>/dev/null | cat | wc -l | awk {'print $1'}`
 
-if [ $BRANCH == "dev" -o $BRANCH == "master" -o $BRANCH == "HEAD" ]; then
-  echo "Deploying with commit hash $REV\n"
+if [ $BRANCH == "HEAD" ]; then
+  echo "Deploying with commit hash ${YELLOW}$REV$NC\n"
 else
-  REV="branch/$BRANCH"
-  echo "Deploying branch $BRANCH\n"
+  REV="$BRANCH"
+  echo "Deploying revision ${YELLOW}$COMMIT$NC for branch ${YELLOW}$BRANCH$NC\n"
 fi
 
 if [[ $BUILD_COUNT -ne 0 ]]; then
-  echo "Detected $BUILD_COUNT build app versions:"
+  echo "Detected $BUILD_COUNT build app versions from logs:"
   for build in build*log; do
-    echo "\t`cat "$build" | grep Hash: | head -1 | cut -d' ' -f2`: `echo $build | cut -d'.' -f2`"
+    echo "\t${YELLOW}`grep Hash: "$build" | head -1 | cut -d' ' -f2`$NC: $build"
   done
   echo
 else
@@ -85,7 +91,7 @@ gulp_config deploy-s3 --env=$ENV
 
 gulp_config rollbar-source-map --env=$ENV --rev=$COMMIT_ROLLBAR
 
-gulp_config deploy-redis --env=$ENV --rev=$REV
+gulp_config deploy-redis --env=$ENV --rev=$COMMIT --branch=$BRANCH
 
 gulp_config git-deploy-tag --env=$ENV --rev=$REV
 
@@ -95,6 +101,8 @@ gulp_config slack-notify --env=$ENV --rev=$REV
 echo "\nDeploy into $ENV environment took ${SECONDS}s.\n"
 
 echo "TEST with:"
-echo "\t$DOMAIN/?rev=$REV"
-echo "THEN to activate run:"
-echo "\tactivate-rev --notify --env=$ENV --rev=$REV\n"
+echo "\t$DOMAIN/?rev=$REV\n"
+echo "To activate the branch (auto updated revision with every branch deploy):"
+echo "\t${CYAN}activate-branch --env=$ENV --branch=$BRANCH --notify$NC\n"
+echo "To activate the commit:"
+echo "\t${CYAN}activate-rev --env=$ENV --rev=$COMMIT --branch=$BRANCH --notify$NC\n"

@@ -25,8 +25,16 @@ async function uploadFile(config, file, rev, branch) {
   await client.set(util.format(config.indexKey, rev), file);
 
   if (branch) {
-    await client.set(util.format(config.branchKey, branch), file);
-    await client.set(util.format(config.branchRevKey, branch), rev);
+    if (!config.branchKey) {
+      gutil.log(gutil.colors.red('No redis.branchKey set in config'));
+    } else {
+      await client.set(util.format(config.branchKey, branch), file);
+    }
+    if (!config.branchRevKey) {
+      gutil.log(gutil.colors.red('No redis.branchRevKey set in config'));
+    } else {
+      await client.set(util.format(config.branchRevKey, branch), rev);
+    }
   }
 
   // Store timestamp information under 'app-timestamp:<rev-number>'
