@@ -17,21 +17,25 @@ Build your Webpack project and run `deploy [environment]`.
 The script will automatically detect the build hash from `build.log`.
 
 ## Commands
-- `deploy`
+- `deploy [environment]`  
 Batch command for quick deployment.
-- `deploy-s3`
+- `deploy-s3 [--env=environment]`  
 AWS S3 asset upload of build files.
-- `deploy-redis`
+- `deploy-redis [--env=environment] [--rev=revision] [--branch=branch]`  
 Redis deployment of revision index html file.
-- `activate-rev`
+- `activate-rev [--env=environment] [--rev=revision] [--branch=branch] [--notify|-n] [--major|-m] [--confirm]`  
 Redis activation of deployed revision.
-- `list-revs`
+- `activate-branch [--env=environment] [--branch=branch] [--confirm]`  
+Redis activation of deployed branch.
+- `current-rev`  
+Display currently auto-detected revision.
+- `list-revs [--env=environment] [--all|-a]`  
 List of deployed revisions with meta information.
-- `rollbar-source-map`
+- `rollbar-source-map [--env=environment] [--rev=revision]`  
 Rollbar source map upload.
-- `slack-notify`
+- `slack-notify [--env=environment] [--rev=revision]`  
 Slack channel notifier.
-- `git-deploy-tag`
+- `git-deploy-tag [--env=environment] [--rev=revision]`  
 Git tag creation and push to remote.
 
 ## Other
