@@ -1,6 +1,14 @@
 # Webpack deploy utilities
 Collection of useful utilities for deploying (not only) Webpack apps
 
+## Deploy
+Each deployment into Redis (`deploy-redis`) saves the `index.html` build file under a full SHA key of the current git commit. (e.g. `app:b45ab63a5aaafd35377ca571824e60fe07a52101`) and optionally updates the “tip” commit of a given branch (using the `--branch` argument). Updates to the branch tip are made by storing it’s revision and index under the `app:branch-revision:branchname` and `app:branch:branchname` respectively.
+
+## Activation
+There are two steps to activate a deployed build. 
+1. Activate branch: use `activate-branch --branch branchname` to activate this branch and set the current main build to the tip of this branch. All consecutive activations **inside this branch** will be automatically promoted as the main current build.
+2. Activate a revision: use `activate-rev --branch branchname --rev SHA` to activate a given SHA revision inside a given branch and set the revision as the main current build **if that branch has been previously activated**.
+
 ## Installation
 ```
 cd $YOUR_PROJECT

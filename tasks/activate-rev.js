@@ -15,11 +15,20 @@ const {
 const { notifyRevActivated } = require('./slack-notify');
 
 async function updateMainRev(client, config, { rev, branch, majorRelease }) {
+  if (!config.indexKey) {
+    gutil.log(gutil.colors.red('No redis.indexKey set in config'));
+    return;
+  }
   const file = await client.get(util.format(config.indexKey, rev));
   if (!file) {
     gutil.log(
       gutil.colors.red('Revision', rev, 'for', config.indexKey, 'not found'),
     );
+    return;
+  }
+
+  if (!config.branchKey) {
+    gutil.log(gutil.colors.red('No redis.branchKey set in config'));
     return;
   }
 
@@ -34,6 +43,11 @@ async function updateMainRev(client, config, { rev, branch, majorRelease }) {
   // Save to branch specific <branchKey> and <branchRevKey>
   client.set(util.format(config.branchKey, branch), file);
   await client.set(util.format(config.branchRevKey, branch), rev);
+
+  if (!config.mainBranchKey) {
+    gutil.log(gutil.colors.red('No redis.branchKey set in config'));
+    return;
+  }
 
   const activeBranch = await client.get(config.mainBranchKey);
 
