@@ -11,7 +11,8 @@ function messagePayload(config, env, rev, fullname) {
     return;
   }
   const hostname = os.hostname();
-  const fallback = `New frontend revision ${rev} was deployed on ${env}` +
+  const fallback =
+    `New frontend revision ${rev} was deployed on ${env}` +
     ` by ${fullname} from ${hostname}.`;
   const text = 'New frontend revision deployed!';
   const link = config.url + '/?rev=' + rev;
@@ -58,9 +59,11 @@ function activatedPayload(config, env, rev, fullname, majorRelease) {
     return;
   }
   const hostname = os.hostname();
-  const fallback = `Frontend revision ${rev} was activated on ${env}` +
+  const fallback =
+    `Frontend revision ${rev} was activated on ${env}` +
     ` by ${fullname} from ${hostname}.`;
-  const text = 'Frontend revision activated' +
+  const text =
+    'Frontend revision activated' +
     (majorRelease ? ' as major release' : '') +
     '!';
   const link = config.url;
@@ -151,4 +154,5 @@ module.exports.notifyRevActivated = notifyRevActivated;
 gulp.task('slack-notify', async () => notifyRevDeployed(getConfigFor('slack')));
 
 gulp.task('slack-notify-active', async () =>
-  notifyRevActivated(getConfigFor('slack')));
+  notifyRevActivated(getConfigFor('slack')),
+);

@@ -1,6 +1,14 @@
 # Webpack deploy utilities
 Collection of useful utilities for deploying (not only) Webpack apps
 
+## Deploy
+Each deployment into Redis (`deploy-redis`) saves the `index.html` build file under a full SHA key of the current git commit. (e.g. `app:b45ab63a5aaafd35377ca571824e60fe07a52101`) and optionally updates the “tip” commit of a given branch (using the `--branch` argument). Updates to the branch tip are made by storing it’s revision and index under the `app:branch-revision:branchname` and `app:branch:branchname` respectively.
+
+## Activation
+There are two steps to activate a deployed build. 
+1. Activate branch: use `activate-branch --branch branchname` to activate this branch and set the current main build to the tip of this branch. All consecutive activations **inside this branch** will be automatically promoted as the main current build.
+2. Activate a revision: use `activate-rev --branch branchname --rev SHA` to activate a given SHA revision inside a given branch and set the revision as the main current build **if that branch has been previously activated**.
+
 ## Installation
 ```
 cd $YOUR_PROJECT
@@ -17,21 +25,25 @@ Build your Webpack project and run `deploy [environment]`.
 The script will automatically detect the build hash from `build.log`.
 
 ## Commands
-- `deploy`
+- `deploy [environment]`  
 Batch command for quick deployment.
-- `deploy-s3`
+- `deploy-s3 [--env=environment]`  
 AWS S3 asset upload of build files.
-- `deploy-redis`
+- `deploy-redis [--env=environment] [--rev=revision] [--branch=branch]`  
 Redis deployment of revision index html file.
-- `activate-rev`
+- `activate-rev [--env=environment] [--rev=revision] [--branch=branch] [--notify|-n] [--major|-m] [--confirm]`  
 Redis activation of deployed revision.
-- `list-revs`
+- `activate-branch [--env=environment] [--branch=branch] [--confirm]`  
+Redis activation of deployed branch.
+- `current-rev`  
+Display currently auto-detected revision.
+- `list-revs [--env=environment] [--all|-a]`  
 List of deployed revisions with meta information.
-- `rollbar-source-map`
+- `rollbar-source-map [--env=environment] [--rev=revision]`  
 Rollbar source map upload.
-- `slack-notify`
+- `slack-notify [--env=environment] [--rev=revision]`  
 Slack channel notifier.
-- `git-deploy-tag`
+- `git-deploy-tag [--env=environment] [--rev=revision]`  
 Git tag creation and push to remote.
 
 ## Other

@@ -7,6 +7,7 @@ const gutil = require('gulp-util');
 const {
   env,
   getRevision,
+  getBranch,
   getConfigFor,
   getRedisClient,
 } = require('./utils');
@@ -15,13 +16,26 @@ const {
 // Deployment process tasks
 //
 
-async function uploadFile(config, file, rev) {
+async function uploadFile(config, file, rev, branch) {
   const client = await getRedisClient(config);
 
   const timestamp = new Date();
 
   // Store index file under indexKey, e.g. 'app:<rev-number>'
   await client.set(util.format(config.indexKey, rev), file);
+
+  if (branch) {
+    if (!config.branchKey) {
+      gutil.log(gutil.colors.red('No redis.branchKey set in config'));
+    } else {
+      await client.set(util.format(config.branchKey, branch), file);
+    }
+    if (!config.branchRevKey) {
+      gutil.log(gutil.colors.red('No redis.branchRevKey set in config'));
+    } else {
+      await client.set(util.format(config.branchRevKey, branch), rev);
+    }
+  }
 
   // Store timestamp information under 'app-timestamp:<rev-number>'
   // so we can compare if we have newer version than latest major rev
@@ -43,12 +57,20 @@ async function uploadFile(config, file, rev) {
   await client.quit();
 }
 
-async function deployRedis(config, rev) {
+async function deployRedis(config, rev, branch) {
   gutil.log(
     gutil.colors.yellow(env()),
     'Uploading revision',
-    gutil.colors.green(rev),
+    gutil.colors.cyan(rev),
   );
+
+  if (branch) {
+    gutil.log(
+      gutil.colors.yellow(env()),
+      'Updating branch',
+      gutil.colors.cyan(branch),
+    );
+  }
 
   await Promise.all(
     (config.files || [config]).map(async fileConfig => {
@@ -60,7 +82,12 @@ async function deployRedis(config, rev) {
         '...',
       );
       const file = fs.readFileSync(fileName, 'utf8');
-      return uploadFile(Object.assign({}, config, fileConfig), file, rev);
+      return uploadFile(
+        Object.assign({}, config, fileConfig),
+        file,
+        rev,
+        branch,
+      );
     }),
   );
 }
@@ -80,5 +107,6 @@ gulp.task('current-rev', printCurrentRev);
  */
 gulp.task('deploy-redis', async () => {
   const rev = await getRevision();
-  await deployRedis(getConfigFor('redis'), rev);
+  const branch = await getBranch();
+  await deployRedis(getConfigFor('redis'), rev, branch);
 });
