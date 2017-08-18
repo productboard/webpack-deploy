@@ -35,7 +35,7 @@ async function updateMainRev(client, config, { rev, branch, majorRelease }) {
   gutil.log(
     gutil.colors.yellow(env()),
     'Activating rev',
-    gutil.colors.green(rev),
+    gutil.colors.cyan(rev),
     'for branch',
     gutil.colors.cyan(branch),
   );
@@ -55,7 +55,7 @@ async function updateMainRev(client, config, { rev, branch, majorRelease }) {
     gutil.log(
       gutil.colors.yellow(env()),
       'Activating rev',
-      gutil.colors.green(rev),
+      gutil.colors.cyan(rev),
       'for',
       gutil.colors.cyan(config.indexKey),
     );
@@ -131,7 +131,7 @@ async function activateVersion(config, { rev, branch, majorRelease }) {
  *
  * Use with '-m' or '--major' to set lastMajorTimestamp key
  */
-gulp.task('activate-rev', async () => {
+gulp.task('update-branch', async () => {
   const majorRelease = argv.major;
   const rev = await getRevision();
   const branch = await getBranch();
