@@ -24,13 +24,21 @@ async function updateMainBranch(client, config, { branch }) {
   gutil.log(
     gutil.colors.yellow(env()),
     'Activating branch',
-    gutil.colors.green(branch),
+    gutil.colors.cyan(branch),
     'for',
     gutil.colors.cyan(config.branchKey),
   );
 
   // Save activated branch name
   client.set(config.mainBranchKey, branch);
+
+  gutil.log(
+    gutil.colors.yellow(env()),
+    'Setting current branch revision',
+    gutil.colors.cyan(rev),
+    'as the current revision for',
+    gutil.colors.cyan(config.branchKey),
+  );
 
   // Update current index and rev
   client.set(config.mainIndexKey, file);
