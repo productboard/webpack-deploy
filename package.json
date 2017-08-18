@@ -28,6 +28,7 @@
     "current-rev": "bin/current-rev",
     "list-revs": "bin/list-revs",
     "slack-notify": "bin/slack-notify",
+    "deploy-info": "bin/deploy-info",
     "deploy-redis": "bin/deploy-redis",
     "deploy-s3": "bin/deploy-s3",
     "rollbar-source-map": "bin/rollbar-source-map",
