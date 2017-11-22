@@ -3,6 +3,7 @@ const gulp = require('gulp');
 const rename = require('gulp-rename');
 const aws = require('gulp-awspublish');
 const gutil = require('gulp-util');
+const gulpIf = require('gulp-if');
 
 const { getConfigFor } = require('./utils.js');
 
@@ -25,7 +26,6 @@ function deployS3(config) {
   const headers = {
     'Cache-Control': 'max-age=315360000, no-transform, public',
   };
-
   return (
     gulp
       .src(config.assetsPath)
@@ -35,7 +35,7 @@ function deployS3(config) {
         }),
       )
       // gzip, Set Content-Encoding headers and add .gz extension
-      .pipe(aws.gzip())
+      .pipe(gulpIf(file => !file.path.match(/\.(mp4|ogg|webm|avi|mov|mkv)$/), aws.gzip()))
       // publisher will add Content-Length, Content-Type and headers specified above
       // If not specified it will set x-amz-acl to public-read by default
       .pipe(publisher.publish(headers))
