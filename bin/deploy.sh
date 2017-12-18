@@ -40,13 +40,13 @@ case "$ENV" in
     DOMAIN="https://pb.productboard.com"
     ;;
   staging)
-    DOMAIN="https://pb.productboard.info"
+    DOMAIN="https://test.productboard.info"
     ;;
   me)
-    DOMAIN="https://pb.productboard.me"
+    DOMAIN="https://test.productboard.me"
     ;;
   development)
-    DOMAIN="http://pb.pbe.dev"
+    DOMAIN="http://test.pbe.test"
     ;;
   *)
   echo "Usage: deploy [enviroment]"
@@ -97,4 +97,4 @@ echo "\nDeploy into $ENV environment took ${SECONDS}s.\n"
 echo "TEST with:"
 echo "\t$DOMAIN/?rev=$REV"
 echo "THEN to activate run:"
-echo "\tactivate-rev --notify --env=$ENV --rev=$REV\n"
+echo "\tyarn activate-rev --notify --env=$ENV --rev=$REV\n"
