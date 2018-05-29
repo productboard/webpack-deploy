@@ -2,14 +2,20 @@ const { promisifyAll } = require('bluebird');
 const request = require('request-promise-native');
 const fs = promisifyAll(require('fs'));
 const glob = require('glob');
-const util = require('util');
 const gulp = require('gulp');
 const gutil = require('gulp-util');
 
 const { env, getRevision, getConfigFor } = require('./utils');
 
+const BUILD_HASH_WILDCARD = '[hash]';
+
+function injectHashIntoPath(path, hash) {
+  return path
+    .replace(BUILD_HASH_WILDCARD, hash)
+    .replace('%s', hash); // deprecated
+}
+
 async function uploadSourceMap(config, rev, callback) {
-  const url = util.format(config.minifiedUrl, config.buildHash);
   const sourceMap = fs.createReadStream(config.sourceMapPath);
 
   // curl https://api.rollbar.com/api/1/sourcemap \
@@ -26,7 +32,7 @@ async function uploadSourceMap(config, rev, callback) {
         formData: {
           access_token: config.accessToken,
           version: rev,
-          minified_url: url,
+          minified_url: config.minifiedUrl,
           source_map: sourceMap,
         },
       },
@@ -43,7 +49,7 @@ async function uploadSourceMap(config, rev, callback) {
     if (parsed && !parsed.err && parsed.result) {
       gutil.log(gutil.colors.yellow(env()), 'Source map uploaded.');
       gutil.log('File:', config.sourceMapPath);
-      gutil.log('URL:', url);
+      gutil.log('URL:', config.minifiedUrl);
       gutil.log(gutil.colors.green('rev:', rev));
     }
   } catch (e) {
@@ -52,50 +58,35 @@ async function uploadSourceMap(config, rev, callback) {
 }
 
 // Finds corresponding hashed source map file name
-function findByHash(mask, hash) {
-  const sourceMapFile = glob.sync(util.format(mask, hash));
-  if (sourceMapFile && sourceMapFile.length > 0) {
-    return sourceMapFile[0];
-  }
-}
+function findByHash(config, hash) {
+  const re = new RegExp(injectHashIntoPath(config.sourceMapPath, hash))
 
-function checkDuplicates(configs, sourceMapPath) {
-  if (configs.length === 1) {
-    return configs[0];
-  } else if (configs.length > 1) {
-    gutil.log('ERROR: Found duplicate source map(s) for', sourceMapPath);
-  } else {
-    gutil.log('ERROR: Could not find source map for', sourceMapPath);
-  }
-}
+  return glob.sync('./**').filter(file => re.test(file)).map(sourceMapPath => {
+    const minifiedUrl = sourceMapPath.replace(
+      re,
+      injectHashIntoPath(config.minifiedUrl, hash)
+    );
 
-const resolveFile = (hashes, sourceMapPathMask) =>
-  hashes.map(buildHash => {
-    const sourceMapPath = findByHash(sourceMapPathMask, buildHash);
-    if (sourceMapPath) {
-      return {
-        buildHash,
-        sourceMapPath,
-      };
+    return {
+      sourceMapPath,
+      minifiedUrl,
     }
   });
+}
 
 const resolveConfig = (hashes, config) =>
-  (config.files || [config])
-    .map(fileConfig => {
-      const found = resolveFile(hashes, fileConfig.sourceMapPath)
-        .filter(Boolean)
-        // Merge in app version specific config
-        .map(conf => Object.assign({}, fileConfig, conf));
-
-      return checkDuplicates(found, fileConfig.sourceMapPath);
-    })
-    .filter(Boolean);
+  hashes.map(
+    hash =>
+      (config.files || [config])
+        .reduce(
+          (result, fileConfig) => result.concat(findByHash(fileConfig, hash)),
+          [],
+        )
+    ).filter(paths => paths.length > 0)
 
 async function uploadAppVersions(config, rev) {
   // Detect last build version hashes
-  const logMask = config.files ? './build.*.log' : 'build.log';
-  const buildLogFiles = glob.sync(logMask);
+  const buildLogFiles = glob.sync('./build*.log');
 
   if (buildLogFiles < 1) {
     gutil.log('ERROR: No build logs found');
@@ -132,8 +123,12 @@ async function uploadAppVersions(config, rev) {
   if (buildLogFiles.length !== resolvedSourceMapConfigs.length) {
     gutil.log('ERROR: Could not find source maps for all builds');
   } else {
+    const flattened = resolvedSourceMapConfigs.reduce(
+      (result, configs) => [...result, ...configs],
+      [],
+    );
     await Promise.all(
-      resolvedSourceMapConfigs.map(async sourceMapConfig =>
+      flattened.map(async sourceMapConfig =>
         uploadSourceMap(Object.assign({}, config, sourceMapConfig), rev),
       ),
     );
