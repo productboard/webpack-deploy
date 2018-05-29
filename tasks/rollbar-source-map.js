@@ -61,17 +61,25 @@ async function uploadSourceMap(config, rev, callback) {
 function findByHash(config, hash) {
   const re = new RegExp(injectHashIntoPath(config.sourceMapPath, hash))
 
-  return glob.sync('./**').filter(file => re.test(file)).map(sourceMapPath => {
-    const minifiedUrl = sourceMapPath.replace(
-      re,
-      injectHashIntoPath(config.minifiedUrl, hash)
-    );
+  return glob.sync('./**')
+    .filter(file => re.test(file))
+    .map(sourceMapPath => {
+      // strip relative path characters
+      const sourceMapPathMatch = sourceMapPath.match(re);
 
-    return {
-      sourceMapPath,
-      minifiedUrl,
-    }
-  });
+      if (sourceMapPathMatch) {
+        const minifiedUrl = sourceMapPathMatch[0].replace(
+          re,
+          injectHashIntoPath(config.minifiedUrl, hash)
+        );
+
+        return {
+          sourceMapPath,
+          minifiedUrl,
+        }
+      }
+    })
+    .filter(Boolean);
 }
 
 const resolveConfig = (hashes, config) =>
