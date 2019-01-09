@@ -1,4 +1,4 @@
 #!/usr/bin/env node
 var path = require('path');
 require(path.join(__dirname, '..', 'tasks', 'activate-rev'));
-require('gulp').start('activate-rev');
+require('gulp').task('activate-rev')();

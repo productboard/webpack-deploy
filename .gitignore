@@ -8,3 +8,6 @@ npm-debug.log
 # ide, editors
 *.sublime-workspace
 .idea
+
+secrets.js
+deploy-config.js
