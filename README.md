@@ -39,6 +39,9 @@ Git tag creation and push to remote.
 ### Why Bash with Gulp?
 Gulp is great for building, Bash for running tasks.
 
+### NPM >= 5.2.0 required
+To find gulp binary also in mono-repos, `npx` is used. `npx` is included with npm from version 5.2.0.
+
 ## TODO
 - reupload/rewrite source map upload to fix activation of feature branches
 - build sample app in monolithic repo

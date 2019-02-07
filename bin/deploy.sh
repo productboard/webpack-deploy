@@ -5,13 +5,7 @@ trap 'exit' ERR
 # let echo interpret escape chars (\n)
 shopt -s xpg_echo
 
-GULP="`npm bin`/gulp"
-
-if [[ ! -x "$GULP" ]]; then
-  echo "ERROR: gulp executable not found"
-  echo "Check path for valid executable: $GULP"
-  exit 1
-fi
+GULP="npx gulp"
 
 gulp_config() {
   $GULP --gulpfile "$DIRNAME/../gulpfile.js" --cwd=$PWD $@

@@ -39,6 +39,9 @@
     "deploy": "npm run s3 & npm run redis & wait",
     "lint": "./node_modules/.bin/eslint --config .eslintrc.json tasks"
   },
+  "engines": {
+    "npm": ">= 5.2.0"
+  },
   "dependencies": {
     "async": "^1.4.2",
     "autoprefixer-core": "^5.2.1",
