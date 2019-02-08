@@ -1,5 +1,5 @@
 {
-  "name": "webpack-deploy",
+  "name": "@productboard/webpack-deploy",
   "version": "0.13.1",
   "description": "Collection of useful utilities for deploying (not only) Webpack apps",
   "main": "index.js",
