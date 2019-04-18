@@ -64,29 +64,3 @@ To find gulp binary also in mono-repos, `npx` is used. `npx` is included with np
 
 ## License
 MIT
-
-## Prettier config
-```
-{
-  // Autoformat files on save
-  "autoformat": true,
-
-  // Only attempt to format files with extensions set there
-  "extensions": ["js"],
-
-  // Fit code within this line limit
-  "printWidth": 80,
-
-  // Number of spaces it should use per tab
-  "tabWidth": 2,
-
-  // If true, will use single instead of double quotes
-  "singleQuote": true,
-
-  // Controls the printing of trailing commas wherever possible
-  "trailingComma": "all",
-
-  // Controls the printing of spaces inside array and objects
-  "bracketSpacing": true
-}
-```
