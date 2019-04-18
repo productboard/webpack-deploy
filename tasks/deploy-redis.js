@@ -17,7 +17,7 @@ async function uploadFiles(config, files, rev) {
 
   // Store file under appropriate keys, e.g. 'app:<rev-number>'
   await Promise.all(
-    files.map(fileKey => client.set(util.format(fileKey, rev), files[fileKey])),
+    Object.entries(files).map(([fileKey, fileContent]) => client.set(util.format(fileKey, rev), fileContent)),
   );
 
   // Store timestamp information under 'app-timestamp:<rev-number>'

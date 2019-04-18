@@ -66,7 +66,7 @@ fi
 if [[ $BUILD_COUNT -ne 0 ]]; then
   echo "Detected $BUILD_COUNT build app versions:"
   for build in build*log; do
-    echo "\t`cat "$build" | grep Hash: | head -1 | cut -d' ' -f2`: `echo $build | cut -d'.' -f2`"
+    echo "\t`cat "$build"  | cut -d'"' -f4`: `echo $build | cut -d'.' -f2`"
   done
   echo
 else
