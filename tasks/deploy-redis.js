@@ -4,24 +4,21 @@ const os = require('os');
 const util = require('util');
 const gutil = require('gulp-util');
 
-const {
-  env,
-  getRevision,
-  getConfigFor,
-  getRedisClient,
-} = require('./utils');
+const { env, getRevision, getConfigFor, getRedisClient } = require('./utils');
 
 //
 // Deployment process tasks
 //
 
-async function uploadFile(config, file, rev) {
+async function uploadFiles(config, files, rev) {
   const client = await getRedisClient(config);
 
   const timestamp = new Date();
 
-  // Store index file under indexKey, e.g. 'app:<rev-number>'
-  await client.set(util.format(config.indexKey, rev), file);
+  // Store file under appropriate keys, e.g. 'app:<rev-number>'
+  await Promise.all(
+    files.map(fileKey => client.set(util.format(fileKey, rev), files[fileKey])),
+  );
 
   // Store timestamp information under 'app-timestamp:<rev-number>'
   // so we can compare if we have newer version than latest major rev
@@ -52,15 +49,47 @@ async function deployRedis(config, rev) {
 
   await Promise.all(
     (config.files || [config]).map(async fileConfig => {
-      const fileName = fileConfig.indexPath;
-      gutil.log(
-        gutil.colors.yellow(env()),
-        'Deploying',
-        gutil.colors.magenta(fileName),
-        '...',
+      /**
+       * Define "files" keys to process. We currently support two of them: index and info.
+       * They has to came in pairs like indexKey and indexPath.
+       *
+       * E.g:
+       *
+       * {
+       *   indexPath: 'dist/index.html',
+       *   indexKey: 'app:%s',
+       *   infoPath: 'build.log',
+       *   infoKey: 'info:%s',
+       * },
+       */
+      const FILES = ['index', 'info'];
+
+      const filesToUpload = FILES.reduce((acc, v) => {
+        const path = fileConfig[`${v}Path`];
+        const key = fileConfig[`${v}Key`];
+
+        if (!path || !key) {
+          return acc;
+        }
+
+        gutil.log(
+          gutil.colors.yellow(env()),
+          'Deploying',
+          gutil.colors.magenta(path),
+          '...',
+        );
+        const fileContent = fs.readFileSync(path, 'utf8');
+
+        acc[key] = fileContent;
+
+        return acc;
+      }, {});
+
+      return uploadFiles(
+        Object.assign({}, config, fileConfig),
+        filesToUpload,
+        rev,
       );
-      const file = fs.readFileSync(fileName, 'utf8');
-      return uploadFile(Object.assign({}, config, fileConfig), file, rev);
     }),
   );
 }
