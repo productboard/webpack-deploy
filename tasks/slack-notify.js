@@ -15,6 +15,9 @@ function messagePayload(config, env, rev, fullname) {
     ` by ${fullname} from ${hostname}.`;
   const text = 'New frontend revision deployed!';
   const link = config.url + '/?rev=' + rev;
+  const diffLink = 'https://github.com/productboard/pb-frontend/commit/' + rev;
+  const ciLink = 'https://circleci.com/gh/productboard/pb-frontend/' + process.env.CIRCLE_BUILD_NUM;
+  const actions = `| <${link}|:point_right: open> | <${diffLink}|:mag_right: diff> | <${ciLink}|:circlepass: ci>`
 
   return {
     channel: config.channel || '#hacking',
@@ -54,34 +57,46 @@ function messagePayload(config, env, rev, fullname) {
     "type": "section",
     "text": {
       "type": "mrkdwn",
-      "text": "New frontend revision deployed!\n*branch/scripts/deployment-slack*"
+      "text": `New frontend revision deployed! :sparkles:\n\t*${rev}*\t${actions}`
     },
     "accessory": {
       "type": "overflow",
+      "action_id": "deploy_action_list",
       "options": [
+        // {
+        //   "text": {
+        //     "type": "plain_text",
+        //     "text": ":mag_right:  Open app at this revision",
+        //     "emoji": true
+        //   },
+        //   "value": "open",
+        //   "url": link
+        // },
+        // {
+        //   "text": {
+        //     "type": "plain_text",
+        //     "text": ":bar_chart:  View deployment log",
+        //     "emoji": true
+        //   },
+        //   "value": "log"
+        // },
+        // {
+        //   "text": {
+        //     "type": "plain_text",
+        //     "text": ":arrows_counterclockwise:  View diff",
+        //     "emoji": true
+        //   },
+        //   "value": "diff",
+        //   "url": diffLink
+        // },
         {
           "text": {
             "type": "plain_text",
-            "text": ":mag_right:  Open app at this revision",
+            "text": ":rocket:  Activate",
             "emoji": true
           },
-          "value": "value-0"
-        },
-        {
-          "text": {
-            "type": "plain_text",
-            "text": ":bar_chart:  View deployment log",
-            "emoji": true
-          },
-          "value": "value-1"
-        },
-        {
-          "text": {
-            "type": "plain_text",
-            "text": ":arrows_counterclockwise:  View diff",
-            "emoji": true
-          },
-          "value": "value-2"
+          "value": "diff",
+          "url": diffLink
         },
         {
           "text": {
@@ -89,7 +104,7 @@ function messagePayload(config, env, rev, fullname) {
             "text": ":warning:  Rollback to this revision",
             "emoji": true
           },
-          "value": "value-3"
+          "value": "rollback"
         }
       ]
     }
