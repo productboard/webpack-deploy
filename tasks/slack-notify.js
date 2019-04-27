@@ -20,35 +20,96 @@ function messagePayload(config, env, rev, fullname) {
     channel: config.channel || '#hacking',
     username: config.botName || 'Deploy Bot',
     icon_emoji: config.botIconEmoji || ':rocket:',
-    attachments: [
+    // attachments: [
+    //   {
+    //     fallback,
+    //     pretext: text,
+    //     color: config.messageColor || '#7CD197',
+    //     fields: [
+    //       {
+    //         title: 'Revision',
+    //         value: rev,
+    //         short: true,
+    //       },
+    //       {
+    //         title: 'Environment',
+    //         value: env,
+    //         short: true,
+    //       },
+    //       {
+    //         title: 'URL',
+    //         value: link,
+    //         short: true,
+    //       },
+    //       {
+    //         title: 'Author',
+    //         value: fullname + ' (' + hostname + ')',
+    //         short: true,
+    //       },
+    //     ],
+    //   },
+    // ],
+    blocks: [
+  {
+    "type": "section",
+    "text": {
+      "type": "plain_text",
+      "text": "New frontend revision deployed!",
+      "emoji": true
+    },
+    "accessory": {
+      "type": "overflow",
+      "options": [
+        {
+          "text": {
+            "type": "plain_text",
+            "text": ":mag_right: Open app at this revision",
+            "emoji": true
+          },
+          "value": "value-0"
+        },
+        {
+          "text": {
+            "type": "plain_text",
+            "text": ":bar_chart: View deployment log",
+            "emoji": true
+          },
+          "value": "value-1"
+        },
+        {
+          "text": {
+            "type": "plain_text",
+            "text": ":arrows_counterclockwise: View diff",
+            "emoji": true
+          },
+          "value": "value-2"
+        },
+        {
+          "text": {
+            "type": "plain_text",
+            "text": ":warning: Rollback to this revision",
+            "emoji": true
+          },
+          "value": "value-3"
+        }
+      ]
+    }
+  },
+  {
+    "type": "section",
+    "fields": [
       {
-        fallback,
-        pretext: text,
-        color: config.messageColor || '#7CD197',
-        fields: [
-          {
-            title: 'Revision',
-            value: rev,
-            short: true,
-          },
-          {
-            title: 'Environment',
-            value: env,
-            short: true,
-          },
-          {
-            title: 'URL',
-            value: link,
-            short: true,
-          },
-          {
-            title: 'Author',
-            value: fullname + ' (' + hostname + ')',
-            short: true,
-          },
-        ],
+        "type": "mrkdwn",
+        "text": "*branch/scripts/deployment-slack*"
       },
-    ],
+      {
+        "type": "plain_text",
+        "text": "LeZuse @ Zuse-MBP",
+        "emoji": true
+      }
+    ]
+  }
+]
   };
 }
 
