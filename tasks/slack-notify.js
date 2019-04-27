@@ -16,7 +16,7 @@ function messagePayload(config, env, rev, fullname) {
   const text = 'New frontend revision deployed!';
   const link = config.url + '/?rev=' + rev;
   const diffLink = 'https://github.com/productboard/pb-frontend/commit/' + rev;
-  const ciLink = 'https://circleci.com/gh/productboard/pb-frontend/' + process.env.CIRCLE_BUILD_NUM;
+  const ciLink = 'https://circleci.com/workflow-run/' + process.env.CIRCLE_WORKFLOW_ID;
   const actions = `| <${link}|:point_right: open> | <${diffLink}|:mag_right: diff> | <${ciLink}|:circlepass: ci>`
 
   return {
