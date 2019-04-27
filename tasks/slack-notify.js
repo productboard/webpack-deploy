@@ -53,9 +53,8 @@ function messagePayload(config, env, rev, fullname) {
   {
     "type": "section",
     "text": {
-      "type": "plain_text",
-      "text": "New frontend revision deployed!",
-      "emoji": true
+      "type": "mrkdwn",
+      "text": "New frontend revision deployed!\n*branch/scripts/deployment-slack*"
     },
     "accessory": {
       "type": "overflow",
@@ -63,7 +62,7 @@ function messagePayload(config, env, rev, fullname) {
         {
           "text": {
             "type": "plain_text",
-            "text": ":mag_right: Open app at this revision",
+            "text": ":mag_right:  Open app at this revision",
             "emoji": true
           },
           "value": "value-0"
@@ -71,7 +70,7 @@ function messagePayload(config, env, rev, fullname) {
         {
           "text": {
             "type": "plain_text",
-            "text": ":bar_chart: View deployment log",
+            "text": ":bar_chart:  View deployment log",
             "emoji": true
           },
           "value": "value-1"
@@ -79,7 +78,7 @@ function messagePayload(config, env, rev, fullname) {
         {
           "text": {
             "type": "plain_text",
-            "text": ":arrows_counterclockwise: View diff",
+            "text": ":arrows_counterclockwise:  View diff",
             "emoji": true
           },
           "value": "value-2"
@@ -87,27 +86,13 @@ function messagePayload(config, env, rev, fullname) {
         {
           "text": {
             "type": "plain_text",
-            "text": ":warning: Rollback to this revision",
+            "text": ":warning:  Rollback to this revision",
             "emoji": true
           },
           "value": "value-3"
         }
       ]
     }
-  },
-  {
-    "type": "section",
-    "fields": [
-      {
-        "type": "mrkdwn",
-        "text": "*branch/scripts/deployment-slack*"
-      },
-      {
-        "type": "plain_text",
-        "text": "LeZuse @ Zuse-MBP",
-        "emoji": true
-      }
-    ]
   }
 ]
   };
