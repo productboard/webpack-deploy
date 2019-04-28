@@ -19,6 +19,13 @@ function messagePayload(config, env, rev, fullname) {
   const ciLink = 'https://circleci.com/workflow-run/' + process.env.CIRCLE_WORKFLOW_ID;
   const actions = `| <${link}|:point_right: open> | <${diffLink}|:mag_right: diff> | <${ciLink}|:circlepass: ci>`
   const encodedData = encodeURIComponent(JSON.strigify({
+    CIRCLE_SHA1: process.env.CIRCLE_SHA1,
+    CIRCLE_WORKFLOW_ID: process.env.CIRCLE_WORKFLOW_ID,
+    CIRCLE_BUILD_NUM: process.env.CIRCLE_BUILD_NUM,
+    CIRCLE_PULL_REQUEST: process.env.CIRCLE_PULL_REQUEST,
+    CIRCLE_USERNAME: process.env.CIRCLE_USERNAME,
+    CIRCLE_PROJECT_USERNAME: process.env.CIRCLE_PROJECT_USERNAME,
+    CIRCLE_PROJECT_REPONAME: process.env.CIRCLE_PROJECT_REPONAME,
     revision: rev,
     activated: false,
   }));
