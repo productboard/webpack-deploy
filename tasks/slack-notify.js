@@ -15,7 +15,7 @@ function messagePayload(config, env, rev, fullname) {
     ` by ${fullname} from ${hostname}.`;
   const text = 'New frontend revision deployed!';
   const link = config.url + '/?rev=' + rev;
-  const diffLink = 'https://github.com/productboard/pb-frontend/commit/' + rev;
+  const diffLink = 'https://github.com/productboard/pb-frontend/compare/' + rev.replace('branch/', '');
   const ciLink = 'https://circleci.com/workflow-run/' + process.env.CIRCLE_WORKFLOW_ID;
   const actions = `| <${link}|:point_right: open> | <${diffLink}|:mag_right: diff> | <${ciLink}|:circlepass: ci>`
 
@@ -95,13 +95,12 @@ function messagePayload(config, env, rev, fullname) {
             "text": ":rocket:  Activate",
             "emoji": true
           },
-          "value": "diff",
-          "url": diffLink
+          "value": "activate"
         },
         {
           "text": {
             "type": "plain_text",
-            "text": ":warning:  Rollback to this revision",
+            "text": ":table_tennis_paddle_and_ball:  Rollback to this revision",
             "emoji": true
           },
           "value": "rollback"
