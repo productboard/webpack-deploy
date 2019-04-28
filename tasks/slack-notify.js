@@ -18,7 +18,7 @@ function messagePayload(config, env, rev, fullname) {
   const diffLink = 'https://github.com/productboard/pb-frontend/compare/' + rev.replace('branch/', '');
   const ciLink = 'https://circleci.com/workflow-run/' + process.env.CIRCLE_WORKFLOW_ID;
   const actions = `| <${link}|:point_right: open> | <${diffLink}|:mag_right: diff> | <${ciLink}|:circlepass: ci>`
-  const encodedData = encodeURIComponent(JSON.strigify({
+  const encodedData = encodeURIComponent(JSON.stringify({
     CIRCLE_SHA1: process.env.CIRCLE_SHA1,
     CIRCLE_WORKFLOW_ID: process.env.CIRCLE_WORKFLOW_ID,
     CIRCLE_BUILD_NUM: process.env.CIRCLE_BUILD_NUM,
