@@ -18,6 +18,10 @@ function messagePayload(config, env, rev, fullname) {
   const diffLink = 'https://github.com/productboard/pb-frontend/compare/' + rev.replace('branch/', '');
   const ciLink = 'https://circleci.com/workflow-run/' + process.env.CIRCLE_WORKFLOW_ID;
   const actions = `| <${link}|:point_right: open> | <${diffLink}|:mag_right: diff> | <${ciLink}|:circlepass: ci>`
+  const encodedData = encodeURIComponent(JSON.strigify({
+    revision: rev,
+    activated: false,
+  }));
 
   return {
     channel: config.channel || '#hacking',
@@ -57,11 +61,29 @@ function messagePayload(config, env, rev, fullname) {
     "type": "section",
     "text": {
       "type": "mrkdwn",
-      "text": `New frontend revision deployed! :sparkles:\n\t*${rev}*\t${actions}`
+      "text": `<aa://${encodedData}.data| >New frontend revision deployed! :sparkles:\n\t*${rev}*\t${actions}`
     },
     "accessory": {
       "type": "overflow",
       "action_id": "deploy_action_list",
+      "confirm": {
+        "title": {
+            "type": "plain_text",
+            "text": "Are you sure?"
+        },
+        "text": {
+            "type": "mrkdwn",
+            "text": "Do you really want to do this?"
+        },
+        "confirm": {
+            "type": "plain_text",
+            "text": "Do it"
+        },
+        "deny": {
+            "type": "plain_text",
+            "text": "Cancel"
+        }
+      },
       "options": [
         // {
         //   "text": {
