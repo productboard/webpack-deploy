@@ -52,7 +52,7 @@ ABBREV_LENGTH=`node ${DIRNAME}/../tasks/config-abbrev --env=$ENV`
 ROLLBAR_ABBREV=`node ${DIRNAME}/../tasks/config-rollbar-abbrev --env=$ENV`
 COMMIT=`git rev-parse --short=${ABBREV_LENGTH} HEAD`
 COMMIT_ROLLBAR=`git rev-parse --short=${ROLLBAR_ABBREV} HEAD`
-BRANCH=`git rev-parse --abbrev-ref HEAD`
+BRANCH="$CIRCLE_BRANCH"
 REV="$COMMIT"
 BUILD_COUNT=`ls -a build*log 2>/dev/null | cat | wc -l | awk {'print $1'}`
 
