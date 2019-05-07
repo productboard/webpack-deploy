@@ -10,9 +10,7 @@ const { env, getRevision, getConfigFor } = require('./utils');
 const BUILD_HASH_WILDCARD = '[hash]';
 
 function injectHashIntoPath(path, hash) {
-  return path
-    .replace(BUILD_HASH_WILDCARD, hash)
-    .replace('%s', hash); // deprecated
+  return path.replace(BUILD_HASH_WILDCARD, hash).replace('%s', hash); // deprecated
 }
 
 async function uploadSourceMap(config, rev, callback) {
@@ -59,9 +57,10 @@ async function uploadSourceMap(config, rev, callback) {
 
 // Finds corresponding hashed source map file name
 function findByHash(config, hash) {
-  const re = new RegExp(injectHashIntoPath(config.sourceMapPath, hash))
+  const re = new RegExp(injectHashIntoPath(config.sourceMapPath, hash));
 
-  return glob.sync('./**')
+  return glob
+    .sync('./**')
     .filter(file => re.test(file))
     .map(sourceMapPath => {
       // strip relative path characters
@@ -70,27 +69,27 @@ function findByHash(config, hash) {
       if (sourceMapPathMatch) {
         const minifiedUrl = sourceMapPathMatch[0].replace(
           re,
-          injectHashIntoPath(config.minifiedUrl, hash)
+          injectHashIntoPath(config.minifiedUrl, hash),
         );
 
         return {
           sourceMapPath,
           minifiedUrl,
-        }
+        };
       }
     })
     .filter(Boolean);
 }
 
 const resolveConfig = (hashes, config) =>
-  hashes.map(
-    hash =>
-      (config.files || [config])
-        .reduce(
-          (result, fileConfig) => result.concat(findByHash(fileConfig, hash)),
-          [],
-        )
-    ).filter(paths => paths.length > 0)
+  hashes
+    .map(hash =>
+      (config.files || [config]).reduce(
+        (result, fileConfig) => result.concat(findByHash(fileConfig, hash)),
+        [],
+      ),
+    )
+    .filter(paths => paths.length > 0);
 
 async function uploadAppVersions(config, rev) {
   // Detect last build version hashes
@@ -109,15 +108,11 @@ async function uploadAppVersions(config, rev) {
   await Promise.all(
     buildLogFiles.map(async file => {
       try {
-        const fd = await fs.openAsync(file, 'r');
-        // Read just the first 64 chars from the log file
-        const buff = new Buffer(64);
-        const read = await fs.readAsync(fd, buff, 0, 64, 0);
-        const header = buff.toString('utf-8', 0, read);
-        // Look for the webpack hash
-        const parsedHeader = header.match(/Hash:\s(\w+)/i);
-        if (parsedHeader && parsedHeader[1]) {
-          hashes.push(parsedHeader[1]);
+        const buffer = await fs.readFileAsync(file);
+        const buildInfo = JSON.parse(buffer);
+
+        if (buildInfo) {
+          hashes.push(buildInfo.hash);
         }
       } catch (e) {
         gutil.log('ERROR: Cannot read', file, e);
