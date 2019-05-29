@@ -42,6 +42,12 @@ case "$ENV" in
   development)
     DOMAIN="http://test.pbe.test"
     ;;
+  k8s_staging)
+    DOMAIN="https://backend.cloud.productboard.info"
+    ;;
+  k8s_production)
+    DOMAIN="https://backend.cloud.productboard.info"
+    ;;
   *)
   echo "Usage: deploy [enviroment]"
   echo "Available environments: production, staging, me, development"
