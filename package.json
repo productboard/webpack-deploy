@@ -30,7 +30,8 @@
     "deploy-redis": "bin/deploy-redis",
     "deploy-s3": "bin/deploy-s3",
     "rollbar-source-map": "bin/rollbar-source-map",
-    "git-deploy-tag": "bin/git-deploy-tag"
+    "git-deploy-tag": "bin/git-deploy-tag",
+    "list-active-rev": "bin/list-active-rev"
   },
   "scripts": {
     "build": "./node_modules/.bin/gulp clean && ./node_modules/.bin/gulp webpack",
