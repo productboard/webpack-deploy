@@ -2,22 +2,23 @@ const gulp = require('gulp');
 const gutil = require('gulp-util');
 
 const { getRedisClient, getConfigFor } = require('./utils');
-const { some } = require('bluebird');
 
 async function getActiveRevision(client, config) {
   const activeRev = await client.get(config.mainRevKey);
 
-  gutil.log(`${config.mainRevKey}=${activeRev}`);
+  return `${config.mainRevKey}=${activeRev}`;
 }
 
-async function printActiveRevision(config) {
+async function printActiveRevisions(config) {
   const client = await getRedisClient(config);
 
-  await Promise.all(
+  const activeRevs = await Promise.all(
     (config.files || [config]).map((fileConfig) =>
       getActiveRevision(client, Object.assign({}, config, fileConfig)),
     ),
   );
+
+  gutil.log(`Active revisions: ${activeRevs}`);
 
   client.quit();
 }
@@ -25,4 +26,4 @@ async function printActiveRevision(config) {
 /**
  * Prints current active revision
  */
-gulp.task('list-active-rev', () => printActiveRevision(getConfigFor('redis')));
+gulp.task('list-active-rev', () => printActiveRevisions(getConfigFor('redis')));
