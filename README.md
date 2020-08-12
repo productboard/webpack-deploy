@@ -27,6 +27,8 @@ Redis deployment of revision index html file.
 Redis activation of deployed revision.
 - `list-revs`
 List of deployed revisions with meta information.
+- `list-active-rev`
+List current active revision.
 - `rollbar-source-map`
 Rollbar source map upload.
 - `slack-notify`

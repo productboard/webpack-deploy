@@ -1,6 +1,6 @@
 {
   "name": "@productboard/webpack-deploy",
-  "version": "0.14.3",
+  "version": "0.15.0",
   "description": "Collection of useful utilities for deploying (not only) Webpack apps",
   "main": "index.js",
   "repository": {
@@ -30,7 +30,8 @@
     "deploy-redis": "bin/deploy-redis",
     "deploy-s3": "bin/deploy-s3",
     "rollbar-source-map": "bin/rollbar-source-map",
-    "git-deploy-tag": "bin/git-deploy-tag"
+    "git-deploy-tag": "bin/git-deploy-tag",
+    "list-active-rev": "bin/list-active-rev"
   },
   "scripts": {
     "build": "./node_modules/.bin/gulp clean && ./node_modules/.bin/gulp webpack",
