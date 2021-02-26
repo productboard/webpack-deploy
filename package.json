@@ -49,7 +49,7 @@
     "bluebird": "^3.5.3",
     "fullname": "^3.0.0",
     "git-rev-promises": "^1.0.8",
-    "gitlog": "^3.1.2",
+    "gitlog": "3.3.6",
     "glob": "^7.1.3",
     "gulp": "^4.0.0",
     "gulp-awspublish": "^4.0.0",

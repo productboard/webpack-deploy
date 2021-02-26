@@ -4,7 +4,7 @@ const gulp = require('gulp');
 const util = require('util');
 const path = require('path');
 const gutil = require('gulp-util');
-const gitlog = promisify(require('gitlog'));
+const gitlog = promisify(require('gitlog').default);
 
 const { argv, env, getConfigFor, getRedisClient } = require('./utils');
 
@@ -83,11 +83,11 @@ async function printVersionRevs(config) {
 
   try {
     let results = await Promise.all(
-      data.map(rev => getRev(rev, currentRev, client, config)),
+      data.map((rev) => getRev(rev, currentRev, client, config)),
     );
 
     results = results
-      .filter(el => el && el.length > 0)
+      .filter((el) => el && el.length > 0)
       .sort((a, b) => a[0] - b[0]);
 
     if (!argv.all && results.length > DEFAULT_MAX_COUNT) {
@@ -106,7 +106,7 @@ async function printVersionRevs(config) {
     }
 
     // Send all to output, leaving out the date
-    results.forEach(el => gutil.log.apply(gutil, el.splice(1)));
+    results.forEach((el) => gutil.log.apply(gutil, el.splice(1)));
   } catch (e) {
     gutil.log('Error:', e);
   } finally {
@@ -116,9 +116,9 @@ async function printVersionRevs(config) {
 
 async function printRevs(config) {
   await Promise.all(
-    (config.files || [config])
-      .map(fileConfig =>
-        printVersionRevs(Object.assign({}, config, fileConfig))),
+    (config.files || [config]).map((fileConfig) =>
+      printVersionRevs(Object.assign({}, config, fileConfig)),
+    ),
   );
 }
 
