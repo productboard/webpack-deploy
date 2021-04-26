@@ -29,8 +29,6 @@ Redis activation of deployed revision.
 List of deployed revisions with meta information.
 - `list-active-rev`
 List current active revision.
-- `rollbar-source-map`
-Rollbar source map upload.
 - `slack-notify`
 Slack channel notifier.
 - `git-deploy-tag`
@@ -52,7 +50,6 @@ To find gulp binary also in mono-repos, `npx` is used. `npx` is included with np
 - list deployed feature branches
 - init: config copy
 - github PR deploy notification: https://developer.github.com/changes/2014-01-09-preview-the-new-deployments-api/
-- rollbar deploy notification: https://rollbar.com/docs/deploys_bash/
 - optional deploy message (for slack)
 - list commits in slack message
 - provide reference backend code snippet

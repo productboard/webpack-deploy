@@ -14,17 +14,6 @@ var secrets = {
     accessKeyId:     '',
     secretAccessKey: '',
   },
-  rollbar: {
-    development: {
-      accessToken: '',
-    },
-    staging: {
-      accessToken: '',
-    },
-    production: {
-      accessToken: '',
-    },
-  },
 };
 
 module.exports = secrets;

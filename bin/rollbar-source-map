@@ -1,4 +1,0 @@
-#!/usr/bin/env node
-var path = require('path');
-require(path.join(__dirname, '..', 'tasks', 'rollbar-source-map'));
-require('gulp').task('rollbar-source-map')();
