@@ -64,7 +64,7 @@
     "html-webpack-plugin": "^3.2.0",
     "object-assign": "^4.0.1",
     "promise-redis": "^0.0.5",
-    "redis": "^2.8.0",
+    "redis": "^3.1.1",
     "request": "^2.61.0",
     "request-promise-native": "^1.0.5",
     "require-dir": "^1.2.0",
